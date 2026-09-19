@@ -2,31 +2,31 @@
 
 ## 1. Architecture decisions and compatibility spike
 
-- [ ] 1.1 Record the approved baseline decisions in repository documentation: two Spring Boot applications, modeler-owned design time, work-app-owned runtime, app-managed identity, one Flowable runtime per client, full CMMN scope, one active default version, and backend-served frontend assets; verify the decision record is reviewable by the human developer.
-- [ ] 1.2 Verify the configured Java, Spring Boot, Flowable OSS, Maven, and frontend toolchain combination with a minimal boot/deploy test; verify both a BPMN definition and a representative CMMN case can be deployed or report the exact unsupported combination before module implementation begins.
-- [ ] 1.3 Define the first-release BPMN/CMMN capability matrix, including supported model elements, form metadata, assignments, timers, variables, and unsupported features; verify every item has a publish-time outcome of supported, rejected, or explicitly deferred.
+- [x] 1.1 Record the approved baseline decisions in repository documentation: two Spring Boot applications, modeler-owned design time, work-app-owned runtime, app-managed identity, one Flowable runtime per client, full CMMN scope, one active default version, and backend-served frontend assets; verify the decision record is reviewable by the human developer.
+- [x] 1.2 Verify the configured Java, Spring Boot, Flowable OSS, Maven, and frontend toolchain combination with a minimal boot/deploy test; verify both a BPMN definition and a representative CMMN case can be deployed or report the exact unsupported combination before module implementation begins.
+- [x] 1.3 Define the first-release BPMN/CMMN capability matrix, including supported model elements, form metadata, assignments, timers, variables, and unsupported features; verify every item has a publish-time outcome of supported, rejected, or explicitly deferred.
 
 ## 2. Repository and shared contract foundation
 
-- [ ] 2.1 Convert the current single-module Maven build into modules for `platform-contracts`, `platform-flowable`, `modeler-app`, and `work-app` without changing the existing status endpoint behavior; verify the full Maven build and current tests pass.
-- [ ] 2.2 Define shared Java contracts for client scope, model identity, model version, BPMN/CMMN document payloads, publication envelope, publication status, runtime definition, task, form schema, and structured errors; verify serialization round trips with contract tests.
-- [ ] 2.3 Define API compatibility and correlation-id conventions for modeler-to-work publication; verify duplicate request and malformed request examples are represented in executable contract tests.
-- [ ] 2.4 Establish shared configuration naming, profile conventions, logging fields, and health response conventions; verify each application can expose an independent health response in a local profile.
+- [x] 2.1 Convert the current single-module Maven build into modules for `platform-contracts`, `platform-flowable`, `modeler-app`, and `work-app` without changing the existing status endpoint behavior; verify the full Maven build and current tests pass.
+- [x] 2.2 Define shared Java contracts for client scope, model identity, model version, BPMN/CMMN document payloads, publication envelope, publication status, runtime definition, task, form schema, and structured errors; verify serialization round trips with contract tests.
+- [x] 2.3 Define API compatibility and correlation-id conventions for modeler-to-work publication; verify duplicate request and malformed request examples are represented in executable contract tests.
+- [x] 2.4 Establish shared configuration naming, profile conventions, logging fields, and health response conventions; verify each application can expose an independent health response in a local profile.
 
 ## 3. Per-client runtime and Flowable adapter
 
-- [ ] 3.1 Implement the client-runtime registry model and provisioning interface without exposing database credentials to frontend or publication callers; verify a client resolves to exactly one configured runtime target and unknown clients fail closed.
-- [ ] 3.2 Implement the Flowable adapter boundary for repository deployment, BPMN runtime, CMMN case runtime, user tasks, variables, and history queries; verify adapter tests use real Flowable services rather than controller mocks.
-- [ ] 3.3 Configure a separate Flowable schema/database per client with migration support and a local test profile; verify two clients can deploy definitions with identical keys without cross-client visibility.
-- [ ] 3.4 Preserve or replace the current Flowable status endpoint with equivalent runtime health behavior; verify the endpoint reports dependency failure safely and includes a correlation identifier.
+- [x] 3.1 Implement the client-runtime registry model and provisioning interface without exposing database credentials to frontend or publication callers; verify a client resolves to exactly one configured runtime target and unknown clients fail closed.
+- [x] 3.2 Implement the Flowable adapter boundary for repository deployment, BPMN runtime, CMMN case runtime, user tasks, variables, and history queries; verify adapter tests use real Flowable services rather than controller mocks.
+- [x] 3.3 Configure a separate Flowable schema/database per client with migration support and a local test profile; verify two clients can deploy definitions with identical keys without cross-client visibility.
+- [x] 3.4 Preserve or replace the current Flowable status endpoint with equivalent runtime health behavior; verify the endpoint reports dependency failure safely and includes a correlation identifier.
 
 ## 4. Modeler persistence and model lifecycle backend
 
-- [ ] 4.1 Implement model project persistence scoped by client, model key, model type, owner, and lifecycle state; verify authorized reads never return another client's project data.
-- [ ] 4.2 Implement immutable published versions and editable drafts for BPMN and CMMN documents; verify editing a published version is rejected and a new draft preserves the published content.
-- [ ] 4.3 Implement XML parsing, normalized metadata extraction, extension metadata validation, and the initial BPMN/CMMN capability matrix checks; verify malformed XML, missing identifiers, unsupported constructs, and invalid form metadata produce actionable errors.
-- [ ] 4.4 Implement publication records with actor, client, version, timestamp, status, runtime reference, failure details, and correlation id; verify failed publication leaves the previous active version unchanged.
-- [ ] 4.5 Clarify the exact metadata and form-schema fields required by the first process examples, including supported controls, variable types, assignment rules, and start inputs; verify the finalized schema is versioned and documented before frontend form work starts.
+- [x] 4.1 Implement model project persistence scoped by client, model key, model type, owner, and lifecycle state; verify authorized reads never return another client's project data.
+- [x] 4.2 Implement immutable published versions and editable drafts for BPMN and CMMN documents; verify editing a published version is rejected and a new draft preserves the published content.
+- [x] 4.3 Implement XML parsing, normalized metadata extraction, extension metadata validation, and the initial BPMN/CMMN capability matrix checks; verify malformed XML, missing identifiers, unsupported constructs, and invalid form metadata produce actionable errors.
+- [x] 4.4 Implement publication records with actor, client, version, timestamp, status, runtime reference, failure details, and correlation id; verify failed publication leaves the previous active version unchanged.
+- [x] 4.5 Clarify the exact metadata and form-schema fields required by the first process examples, including supported controls, variable types, assignment rules, and start inputs; verify the finalized schema is versioned and documented before frontend form work starts.
 
 ## 5. Work application runtime API
 
