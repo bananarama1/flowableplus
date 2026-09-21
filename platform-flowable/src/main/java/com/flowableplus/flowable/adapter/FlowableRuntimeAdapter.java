@@ -19,6 +19,8 @@ public interface FlowableRuntimeAdapter {
 
     Map<String, Object> getTaskVariables(String taskId);
 
+    void claimTask(String taskId, String assignee);
+
     void completeTask(String taskId, Map<String, Object> variables);
 
     HistoryEntry findProcessHistory(String processInstanceId);

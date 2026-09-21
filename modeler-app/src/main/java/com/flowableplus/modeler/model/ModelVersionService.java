@@ -3,16 +3,21 @@ package com.flowableplus.modeler.model;
 import com.flowableplus.contracts.ModelType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.UUID;
+import com.flowableplus.modeler.audit.AuditEventService;
 
 @Service
 public class ModelVersionService {
 
     private final ModelProjectRepository projectRepository;
     private final ModelVersionRepository versionRepository;
+        private final AuditEventService auditEventService;
 
-    public ModelVersionService(ModelProjectRepository projectRepository, ModelVersionRepository versionRepository) {
+        public ModelVersionService(ModelProjectRepository projectRepository, ModelVersionRepository versionRepository,
+            AuditEventService auditEventService) {
         this.projectRepository = projectRepository;
         this.versionRepository = versionRepository;
+        this.auditEventService = auditEventService;
     }
 
     @Transactional
@@ -22,13 +27,16 @@ public class ModelVersionService {
                 .mapToInt(ModelVersionEntity::getVersionNumber)
                 .max()
                 .orElse(0) + 1;
-        return versionRepository.save(new ModelVersionEntity(clientId, projectId, nextVersion, xml));
+        ModelVersionEntity draft = versionRepository.save(new ModelVersionEntity(clientId, projectId, nextVersion, xml));
+        auditEventService.record(null, clientId, draft.getId(), "MODEL_DRAFT_SAVE", "SUCCESS", UUID.randomUUID().toString());
+        return draft;
     }
 
     @Transactional
     public ModelVersionEntity updateDraft(String clientId, String versionId, String xml) {
         ModelVersionEntity version = versionRepository.findByIdAndClientId(versionId, clientId).orElseThrow();
         version.updateDraft(xml);
+        auditEventService.record(null, clientId, versionId, "MODEL_EDIT", "SUCCESS", UUID.randomUUID().toString());
         return versionRepository.save(version);
     }
 
@@ -36,6 +44,7 @@ public class ModelVersionService {
     public ModelVersionEntity publish(String clientId, String versionId) {
         ModelVersionEntity version = versionRepository.findByIdAndClientId(versionId, clientId).orElseThrow();
         version.publish();
+        auditEventService.record(null, clientId, versionId, "MODEL_PUBLISH", "SUCCESS", UUID.randomUUID().toString());
         return versionRepository.save(version);
     }
 

@@ -30,19 +30,19 @@
 
 ## 5. Work application runtime API
 
-- [ ] 5.1 Implement publication intake in the work app with authentication, client-runtime resolution, envelope validation, and idempotency; verify retries return the existing result and do not create duplicate Flowable deployments.
-- [ ] 5.2 Implement runtime compatibility validation and activation for BPMN and CMMN definitions; verify unsupported definitions are rejected with safe diagnostics and the previous active version remains active.
-- [ ] 5.3 Implement active definition catalog APIs with model key, type, version, display name, startability, and client scope; verify only one configured active default version is offered for normal starts.
-- [ ] 5.4 Implement process start, CMMN case start, process/case detail, task inbox, task detail, and history APIs; verify real Flowable integration tests cover successful execution and client-isolation failures.
-- [ ] 5.5 Implement generic form metadata retrieval and task completion with server-side required/type/business validation; verify invalid submissions leave tasks active and valid submissions persist variables and complete tasks.
-- [ ] 5.6 Clarify the first-release runtime API pagination, sorting, filtering, and history retention rules; verify the API contract documents stable behavior for empty, large, and unauthorized result sets.
+- [x] 5.1 Implement publication intake in the work app with authentication, client-runtime resolution, envelope validation, and idempotency; verify retries return the existing result and do not create duplicate Flowable deployments.
+- [x] 5.2 Implement runtime compatibility validation and activation for BPMN and CMMN definitions; verify unsupported definitions are rejected with safe diagnostics and the previous active version remains active.
+- [x] 5.3 Implement active definition catalog APIs with model key, type, version, display name, startability, and client scope; verify only one configured active default version is offered for normal starts.
+- [x] 5.4 Implement process start, CMMN case start, process/case detail, task inbox, task detail, and history APIs; verify real Flowable integration tests cover successful execution and client-isolation failures.
+- [x] 5.5 Implement generic form metadata retrieval and task completion with server-side required/type/business validation; verify invalid submissions leave tasks active and valid submissions persist variables and complete tasks.
+- [x] 5.6 Clarify the first-release runtime API pagination, sorting, filtering, and history retention rules; verify the API contract documents stable behavior for empty, large, and unauthorized result sets.
 
 ## 6. Application-managed identity and authorization
 
-- [ ] 6.1 Implement application-managed users, client memberships, roles, and permission assignments with password/session or token handling selected by the human developer; verify protected endpoints reject unauthenticated requests.
-- [ ] 6.2 Implement authorization policies for model editing, validation, publication, process/case start, task view, task claim, and task completion; verify positive and negative tests for each operation and client boundary.
-- [ ] 6.3 Implement audit events for model mutations, publications, starts, claims, completions, and authorization failures; verify each event contains actor, client, target, timestamp, operation, outcome, and correlation id.
-- [ ] 6.4 Clarify the initial user provisioning and credential recovery workflow; verify the chosen workflow is documented and does not require manual database edits in normal operation.
+- [x] 6.1 Implement application-managed users, client memberships, roles, and permission assignments with password/session or token handling selected by the human developer; verify protected endpoints reject unauthenticated requests.
+- [x] 6.2 Implement authorization policies for model editing, validation, publication, process/case start, task view, task claim, and task completion; verify positive and negative tests for each operation and client boundary.
+- [x] 6.3 Implement audit events for model mutations, publications, starts, claims, completions, and authorization failures; verify each event contains actor, client, target, timestamp, operation, outcome, and correlation id.
+- [x] 6.4 Clarify the initial user provisioning and credential recovery workflow; verify the chosen workflow is documented and does not require manual database edits in normal operation.
 
 ## 7. Modeler frontend IDE
 

@@ -99,6 +99,11 @@ public class DefaultFlowableRuntimeAdapter implements FlowableRuntimeAdapter {
     }
 
     @Override
+    public void claimTask(String taskId, String assignee) {
+        taskService.claim(taskId, assignee);
+    }
+
+    @Override
     public void completeTask(String taskId, Map<String, Object> variables) {
         taskService.complete(taskId, variables);
     }
