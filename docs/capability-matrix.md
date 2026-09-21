@@ -4,6 +4,8 @@ Publication validation uses this matrix before a definition can become active. E
 
 ## BPMN
 
+The first-release BPMN editor uses `bpmn-js` and exposes only the supported runtime surface: start/end/terminate events, user tasks, approved built-in service tasks, exclusive/parallel gateways, sequence flows, supported timers, assignments, variables, and form references. The original XML is authoritative; round-trip import/export must preserve unknown Flowable extension elements and attributes even when the editor does not expose them for editing.
+
 | Capability | Outcome | Publish-time rule |
 | --- | --- | --- |
 | None, start, end, and terminate events | Supported | Validate event identifiers and legal sequence flows. |
@@ -22,6 +24,8 @@ Publication validation uses this matrix before a definition can become active. E
 | Generic task forms | Supported | Require the versioned form schema and supported field types below. |
 
 ## CMMN
+
+The first-release CMMN editor uses a constrained custom authoring surface with CMMN 1.1 XML parsing/serialization through `cmmn-moddle`; the archived `cmmn-js` renderer is not adopted as a maintained runtime dependency. The supported authoring surface is stages, human tasks, sentries with approved conditions, milestones, supported timers, case variables, and user/group assignments. Unknown CMMN and Flowable extension elements and attributes must survive round-trip editing, while backend validation remains the publication compatibility gate.
 
 | Capability | Outcome | Publish-time rule |
 | --- | --- | --- |

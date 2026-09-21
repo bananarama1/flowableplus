@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Flowable Plus Work</title>
+    <link rel="stylesheet" href="/work.css">
+</head>
+<body>
+<main class="work-shell">
+    <header class="topbar"><div class="brand"><span class="brand-mark">F+</span><span>Work</span></div><div class="client"><span class="eyebrow">WORKSPACE</span><strong>Northstar Operations</strong></div><div class="top-actions"><span>alice@northstar.example</span><button class="avatar" aria-label="Open account menu">AL</button></div></header>
+    <div class="work-layout">
+        <nav class="nav" aria-label="Work navigation"><a class="nav-item active" href="#inbox"><span>▣</span> Inbox <b>3</b></a><a class="nav-item" href="#catalog"><span>◇</span> Start work</a><a class="nav-item" href="#instances"><span>◌</span> Instances</a><a class="nav-item" href="#history"><span>⌁</span> History</a><div class="nav-bottom"><a class="nav-item" href="#status"><span>●</span> System status</a></div></nav>
+        <section class="content">
+            <div class="page-heading"><div><span class="eyebrow blue-text">MY WORK</span><h1>Inbox</h1><p>Tasks assigned to you or your available teams.</p></div><button class="primary" id="start-work" type="button">Start work</button></div>
+            <div class="summary-row"><div class="summary"><span class="summary-number">3</span><span>Open tasks</span></div><div class="summary"><span class="summary-number amber-text">1</span><span>Due today</span></div><div class="summary"><span class="summary-number green-text">12</span><span>Completed this week</span></div></div>
+            <div class="content-grid">
+                <section class="panel task-list"><div class="panel-heading"><h2>Assigned tasks</h2><button class="filter">All tasks ▾</button></div><button class="task selected" data-task="review"><span class="task-type blue-fill">R</span><span class="task-copy"><strong>Review order #1048</strong><small>Order intake · Review order</small></span><span class="due amber-text">Due today</span></button><button class="task" data-task="verify"><span class="task-type green-fill">V</span><span class="task-copy"><strong>Verify customer details</strong><small>Customer onboarding · Verify details</small></span><span class="due">Tomorrow</span></button><button class="task" data-task="approve"><span class="task-type violet-fill">A</span><span class="task-copy"><strong>Approve invoice INV-219</strong><small>Invoice review · Approval</small></span><span class="due">26 Sep</span></button></section>
+                <section class="panel task-detail" id="task-detail"><div class="detail-head"><div><span class="eyebrow">USER TASK</span><h2>Review order #1048</h2><p>Order intake <span class="separator">·</span> Order form</p></div><button class="secondary" type="button" id="claim-task">Claim task</button></div><div class="detail-meta"><span><small>Assigned to</small><strong>sales-team</strong></span><span><small>Started</small><strong>21 Sep 2026, 13:49</strong></span><span><small>Instance</small><strong>PI-1048</strong></span></div><form class="task-form" id="task-form"><div class="form-title">Review details</div><div id="form-fields"></div><div class="form-actions"><span class="form-message" aria-live="polite"></span><button class="primary" type="submit">Complete task</button></div></form><div class="start-panel" id="start-panel" hidden><div class="form-title">Start an available process</div><select id="definition-select" aria-label="Process definition"></select><button class="primary" id="confirm-start" type="button">Start selected</button><span class="form-message" id="start-message" aria-live="polite"></span></div></section>
+            </div>
+        </section>
+    </div>
+</main>
+<script src="/work.js"></script>
+</body>
+</html>

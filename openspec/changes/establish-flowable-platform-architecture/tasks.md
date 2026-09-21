@@ -46,16 +46,16 @@
 
 ## 7. Modeler frontend IDE
 
-- [ ] 7.1 Create the modeler frontend shell with client/project navigation, model tabs, editor canvas, properties panel, validation output, version history, and publication status; verify the shell loads through the modeler Spring Boot application.
-- [ ] 7.2 Integrate BPMN editing, palette configuration, Flowable-compatible properties, assignment metadata, variables, and form references; verify a representative model can be opened, edited, saved, and round-tripped without losing supported XML or metadata.
-- [ ] 7.3 Integrate CMMN authoring for the approved capability matrix, including stages, human tasks, case variables, sentries, milestones, and timers where supported; verify representative CMMN documents round-trip through the editor and pass backend validation.
-- [ ] 7.4 Implement draft save, validation display, immutable version creation, and publish controls; verify the UI prevents publication when backend validation fails and shows publication correlation/status details.
+- [x] 7.1 Create the modeler frontend shell with client/project navigation, model tabs, editor canvas, properties panel, validation output, version history, and publication status; verify the shell loads through the modeler Spring Boot application.
+- [x] 7.2 Integrate BPMN editing, palette configuration, Flowable-compatible properties, assignment metadata, variables, and form references; verify a representative model can be opened, edited, saved, and round-tripped without losing supported XML or metadata.
+- [x] 7.3 Integrate CMMN authoring for the approved capability matrix, including stages, human tasks, case variables, sentries, milestones, and timers where supported; verify representative CMMN documents round-trip through the editor and pass backend validation.
+- [x] 7.4 Implement draft save, validation display, immutable version creation, and publish controls; verify the UI prevents publication when backend validation fails and shows publication correlation/status details.
 - [ ] 7.5 Clarify the IDE interaction model for unsaved changes, concurrent editing, conflict resolution, keyboard shortcuts, and model recovery; verify the chosen behavior is captured in frontend acceptance tests.
 
 ## 8. Work frontend and generic form renderer
 
-- [ ] 8.1 Create the work frontend shell with process/case catalog, task inbox, task detail, instance detail, and status navigation; verify the shell loads through the work Spring Boot application and respects client scope.
-- [ ] 8.2 Implement schema-driven generic form rendering for the approved field types, labels, required/type constraints, initial values, and variable mappings; verify forms render without process-specific frontend code.
+- [x] 8.1 Create the work frontend shell with process/case catalog, task inbox, task detail, instance detail, and status navigation; verify the shell loads through the work Spring Boot application and respects client scope.
+- [x] 8.2 Implement schema-driven generic form rendering for the approved field types, labels, required/type constraints, initial values, and variable mappings; verify forms render without process-specific frontend code.
 - [ ] 8.3 Implement start-process/start-case, task submission, validation errors, task completion, and next-state refresh flows; verify browser tests cover both valid and invalid submissions.
 - [ ] 8.4 Implement basic process and case monitoring views with active state, task state, version, and timeline data; verify the UI handles empty, failed, completed, and unauthorized states without exposing protected data.
 - [ ] 8.5 Clarify accessibility, localization, responsive behavior, and browser support requirements for both frontends; verify the agreed baseline with automated accessibility and browser smoke checks.

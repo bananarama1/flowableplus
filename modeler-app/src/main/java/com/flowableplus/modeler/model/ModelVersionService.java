@@ -3,6 +3,7 @@ package com.flowableplus.modeler.model;
 import com.flowableplus.contracts.ModelType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 import java.util.UUID;
 import com.flowableplus.modeler.audit.AuditEventService;
 
@@ -55,5 +56,16 @@ public class ModelVersionService {
             throw new IllegalStateException("Only a published version can seed a new draft");
         }
         return saveDraft(clientId, published.getProjectId(), published.getXml());
+    }
+
+    public List<ModelVersionEntity> findForProject(String clientId, String projectId) {
+        projectRepository.findByIdAndClientId(projectId, clientId).orElseThrow();
+        return versionRepository.findAllByProjectIdOrderByVersionNumberDesc(projectId).stream()
+                .filter(version -> clientId.equals(version.getClientId()))
+                .toList();
+    }
+
+    public ModelVersionEntity findAuthorized(String clientId, String versionId) {
+        return versionRepository.findByIdAndClientId(versionId, clientId).orElseThrow();
     }
 }
