@@ -1,0 +1,8 @@
+{
+  "name": "flowableplus-work-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/work-shell.test.js"
+  }
+}

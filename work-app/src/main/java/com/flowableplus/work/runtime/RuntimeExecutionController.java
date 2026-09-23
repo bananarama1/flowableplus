@@ -82,7 +82,7 @@ public class RuntimeExecutionController {
     }
 
     @PostMapping("/tasks/{taskId}/complete")
-    public ResponseEntity<List<RuntimeTask>> completeTask(
+    public ResponseEntity<?> completeTask(
             @PathVariable String taskId, @RequestParam String clientId,
             Authentication authentication, @RequestBody Map<String, Object> variables) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.TASK_COMPLETE);
@@ -90,7 +90,7 @@ public class RuntimeExecutionController {
                 clientId, taskId, variables, authentication.getName());
         return result.errors().isEmpty()
             ? ResponseEntity.ok(result.nextTasks())
-            : ResponseEntity.unprocessableEntity().build();
+            : ResponseEntity.unprocessableEntity().body(Map.of("errors", result.errors()));
     }
 
     @GetMapping("/process-instances/{instanceId}")

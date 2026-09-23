@@ -113,7 +113,10 @@ public class DefaultFlowableRuntimeAdapter implements FlowableRuntimeAdapter {
         HistoricProcessInstance history = historyService.createHistoricProcessInstanceQuery()
                 .processInstanceId(processInstanceId)
                 .singleResult();
-        return new HistoryEntry(history.getId(), history.getProcessDefinitionKey(), history.getEndTime() == null ? "ACTIVE" : "COMPLETED",
+        int version = repositoryService.createProcessDefinitionQuery()
+            .processDefinitionId(history.getProcessDefinitionId()).singleResult().getVersion();
+        return new HistoryEntry(history.getId(), history.getProcessDefinitionKey(), version,
+            history.getEndTime() == null ? "ACTIVE" : "COMPLETED",
                 toInstant(history.getStartTime()), toInstant(history.getEndTime()));
     }
 
@@ -122,7 +125,10 @@ public class DefaultFlowableRuntimeAdapter implements FlowableRuntimeAdapter {
         HistoricCaseInstance history = cmmnHistoryService.createHistoricCaseInstanceQuery()
                 .caseInstanceId(caseInstanceId)
                 .singleResult();
-        return new HistoryEntry(history.getId(), history.getCaseDefinitionKey(), history.getEndTime() == null ? "ACTIVE" : "COMPLETED",
+        int version = cmmnRepositoryService.createCaseDefinitionQuery()
+            .caseDefinitionId(history.getCaseDefinitionId()).singleResult().getVersion();
+        return new HistoryEntry(history.getId(), history.getCaseDefinitionKey(), version,
+            history.getEndTime() == null ? "ACTIVE" : "COMPLETED",
                 toInstant(history.getStartTime()), toInstant(history.getEndTime()));
     }
 

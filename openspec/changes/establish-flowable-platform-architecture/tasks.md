@@ -56,9 +56,9 @@
 
 - [x] 8.1 Create the work frontend shell with process/case catalog, task inbox, task detail, instance detail, and status navigation; verify the shell loads through the work Spring Boot application and respects client scope.
 - [x] 8.2 Implement schema-driven generic form rendering for the approved field types, labels, required/type constraints, initial values, and variable mappings; verify forms render without process-specific frontend code.
-- [ ] 8.3 Implement start-process/start-case, task submission, validation errors, task completion, and next-state refresh flows; verify browser tests cover both valid and invalid submissions.
-- [ ] 8.4 Implement basic process and case monitoring views with active state, task state, version, and timeline data; verify the UI handles empty, failed, completed, and unauthorized states without exposing protected data.
-- [ ] 8.5 Clarify accessibility, localization, responsive behavior, and browser support requirements for both frontends; verify the agreed baseline with automated accessibility and browser smoke checks.
+- [x] 8.3 Implement start-process/start-case, task submission, validation errors, task completion, and next-state refresh flows; verify browser tests cover both valid and invalid submissions.
+- [x] 8.4 Implement basic process and case monitoring views with active state, task state, version, and timeline data; verify the UI handles empty, failed, completed, and unauthorized states without exposing protected data.
+- [x] 8.5 Clarify accessibility, localization, responsive behavior, and browser support requirements for both frontends; verify the agreed baseline with automated accessibility and browser smoke checks.
 
 ## 9. Publication integration and end-to-end vertical slice
 
