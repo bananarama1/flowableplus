@@ -50,7 +50,7 @@
 - [x] 7.2 Integrate BPMN editing, palette configuration, Flowable-compatible properties, assignment metadata, variables, and form references; verify a representative model can be opened, edited, saved, and round-tripped without losing supported XML or metadata.
 - [x] 7.3 Integrate CMMN authoring for the approved capability matrix, including stages, human tasks, case variables, sentries, milestones, and timers where supported; verify representative CMMN documents round-trip through the editor and pass backend validation.
 - [x] 7.4 Implement draft save, validation display, immutable version creation, and publish controls; verify the UI prevents publication when backend validation fails and shows publication correlation/status details.
-- [ ] 7.5 Clarify the IDE interaction model for unsaved changes, concurrent editing, conflict resolution, keyboard shortcuts, and model recovery; verify the chosen behavior is captured in frontend acceptance tests.
+- [x] 7.5 Clarify the IDE interaction model for unsaved changes, concurrent editing, conflict resolution, keyboard shortcuts, and model recovery; verify the chosen behavior is captured in frontend acceptance tests.
 
 ## 8. Work frontend and generic form renderer
 

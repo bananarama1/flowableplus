@@ -1091,6 +1091,7 @@ var require_dist2 = __commonJS({
 
 // test/editor-roundtrip.test.js
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 // node_modules/bpmn-moddle/node_modules/min-dash/dist/index.esm.js
@@ -10613,4 +10614,13 @@ test("CMMN round-trip preserves supported elements and unknown extension data", 
   const output = await writeCmmn(moddle, parsed);
   assert.match(output, /cmmn:case/);
   assert.match(output, /id="case"/);
+});
+test("modeler Save draft persists the current model and keeps advanced collaboration out of scope", async () => {
+  const html = await readFile(new URL("../../src/main/resources/static/index.html", import.meta.url), "utf8");
+  const modeler = await readFile(new URL("../../src/main/resources/static/modeler.js", import.meta.url), "utf8");
+  assert.match(html, /id="save-draft"[^>]*>Save draft</);
+  assert.match(modeler, /FlowablePlusEditor\.exportCurrent\(\)/);
+  assert.match(modeler, /\/versions\?clientId=/);
+  assert.match(modeler, /Draft saved/);
+  assert.match(modeler, /Draft could not be saved/);
 });
