@@ -8,12 +8,17 @@ import com.flowableplus.contracts.FormSchema;
 import com.flowableplus.contracts.ModelType;
 import com.flowableplus.modeler.validation.ModelDocumentValidator;
 import com.flowableplus.modeler.validation.ModelValidationResult;
+import com.flowableplus.modeler.publication.ModelerPublicationClient;
+import com.flowableplus.modeler.publication.PublicationRecordEntity;
+import com.flowableplus.modeler.publication.PublicationRecordService;
+import com.flowableplus.contracts.PublicationResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,14 +30,20 @@ public class ModelerModelController {
     private final ModelProjectService projectService;
     private final ModelVersionService versionService;
     private final ModelDocumentValidator validator;
+    private final ModelerPublicationClient publicationClient;
+    private final PublicationRecordService publicationRecordService;
 
     public ModelerModelController(
             ModelProjectService projectService,
             ModelVersionService versionService,
-            ModelDocumentValidator validator) {
+            ModelDocumentValidator validator,
+            ModelerPublicationClient publicationClient,
+            PublicationRecordService publicationRecordService) {
         this.projectService = projectService;
         this.versionService = versionService;
         this.validator = validator;
+        this.publicationClient = publicationClient;
+        this.publicationRecordService = publicationRecordService;
     }
 
     @GetMapping("/projects")
@@ -73,17 +84,31 @@ public class ModelerModelController {
 
     @PostMapping("/versions/{versionId}/publish")
     public ResponseEntity<?> publish(
-            @RequestParam String clientId, @PathVariable String versionId, @RequestBody PublishRequest request) {
+            @RequestParam String clientId, @PathVariable String versionId, @RequestBody PublishRequest request,
+            @RequestHeader("Authorization") String authorization) {
         ModelVersionEntity version = versionService.findAuthorized(clientId, versionId);
+        ModelProjectEntity project = projectService.findAuthorized(clientId, version.getProjectId());
+        String correlationId = correlationId(request.correlationId());
         ModelValidationResult validation = validator.validate(
-                request.modelType(), version.getXml(), request.formSchema(), correlationId(request.correlationId()));
+            request.modelType(), version.getXml(), request.formSchema(), correlationId);
         if (!validation.valid()) {
             return ResponseEntity.unprocessableEntity().body(validation);
         }
+        PublicationResult publication = publicationClient.publish(
+            project, version, request.formSchema(), request.actorId(), correlationId, authorization);
+        if (publication.status() != com.flowableplus.contracts.PublicationStatus.ACTIVE) {
+            PublicationRecordEntity failure = publicationRecordService.recordFailure(
+                clientId, project.getModelKey(), versionId, request.actorId(), publication.failureMessage(), correlationId);
+            return ResponseEntity.unprocessableEntity().body(failure);
+        }
+        ModelVersionEntity published = versionService.publish(clientId, versionId);
+        PublicationRecordEntity record = publicationRecordService.recordActive(
+            clientId, project.getModelKey(), versionId, request.actorId(), publication.runtimeReference(), correlationId);
         return ResponseEntity.ok(Map.of(
-                "version", versionService.publish(clientId, versionId),
-                "correlationId", correlationId(request.correlationId()),
-                "status", "PUBLISHED"));
+            "version", published,
+            "publication", record,
+            "correlationId", correlationId,
+            "status", publication.status()));
     }
 
     private String correlationId(String requested) {
@@ -96,5 +121,5 @@ public class ModelerModelController {
 
     public record ValidationRequest(ModelType modelType, FormSchema formSchema, String correlationId) { }
 
-    public record PublishRequest(ModelType modelType, FormSchema formSchema, String correlationId) { }
+    public record PublishRequest(ModelType modelType, FormSchema formSchema, String correlationId, String actorId) { }
 }

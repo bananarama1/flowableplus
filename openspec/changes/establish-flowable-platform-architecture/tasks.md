@@ -62,7 +62,7 @@
 
 ## 9. Publication integration and end-to-end vertical slice
 
-- [ ] 9.1 Connect modeler publication to work-app publication intake using the shared contract and authenticated client-runtime routing; verify a modeler publish creates an active definition in the intended client runtime without manual configuration.
+- [x] 9.1 Connect modeler publication to work-app publication intake using the shared contract and authenticated client-runtime routing; verify a modeler publish creates an active definition in the intended client runtime without manual configuration.
 - [ ] 9.2 Implement publication retry/status polling and failure presentation in the modeler; verify transient duplicate requests are idempotent and failed publication never replaces the last active version.
 - [ ] 9.3 Execute the full BPMN vertical slice from model creation through task completion and audit lookup; verify it passes with two clients and includes negative cross-client assertions.
 - [ ] 9.4 Execute the full CMMN vertical slice from case creation through supported case execution and case status inspection; verify all elements in the first-release capability matrix behave as declared.
