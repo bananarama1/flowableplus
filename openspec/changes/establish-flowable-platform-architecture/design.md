@@ -17,7 +17,7 @@ The requested product is a reusable modeler for multiple clients. The modeler sh
 - Support client-scoped models and runtime operations with explicit authorization checks.
 - Support generic task forms through published metadata and a stable schema.
 - Keep Flowable OSS as the runtime foundation without depending on Enterprise UI modules.
-- Make publication idempotent, observable, and safe to retry.
+- Make publication idempotent, observable, and safe under duplicate requests.
 
 **Non-Goals:**
 
@@ -49,9 +49,11 @@ The work application owns the executable Flowable engine and its runtime databas
 
 The work app performs its own compatibility validation before activation. It creates the Flowable deployment or case deployment, records the resulting runtime reference, and returns a publication status. The modeler retains the publication record and correlation identifier.
 
-Publication is synchronous for the first vertical slice, with a durable publication state and idempotency key so a later implementation can add asynchronous retry processing without changing the external model identity. The work app must never activate a second deployment for the same client, model key, version, and idempotency key.
+Publication is synchronous for the first release. The modeler makes one authenticated HTTP request to the work app and treats timeout, connection failure, and non-success responses as ordinary publication errors. The modeler does not retry and does not poll publication status. The modeler displays the failure and leaves the local version unpublished.
 
-Alternative considered: share one Flowable database between both applications. Rejected because it couples deployments to Flowable schema ownership, makes independent operation misleading, and allows one app to bypass the publication contract. Alternative considered: introduce a message broker immediately. Deferred because it adds operational complexity before the synchronous contract and retry semantics are proven.
+The work app owns transactionality: validation, Flowable deployment, publication persistence, and active-version activation commit together or roll back together. Idempotency remains server-side protection against duplicate or concurrent requests using the same client, model, version, and idempotency key; it does not imply client retry behavior. For concurrent different publications of the same model, the transaction that commits last becomes active. The work app must never activate a second deployment for the same client, model key, version, and idempotency key.
+
+Alternative considered: share one Flowable database between both applications. Rejected because it couples deployments to Flowable schema ownership, makes independent operation misleading, and allows one app to bypass the publication contract. Alternative considered: introduce a message broker immediately. Deferred because it adds operational complexity before the synchronous contract and transactional failure semantics are proven.
 
 ### 3. Model storage and lifecycle
 

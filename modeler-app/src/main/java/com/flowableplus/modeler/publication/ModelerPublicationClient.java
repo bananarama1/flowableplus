@@ -9,6 +9,7 @@ import com.flowableplus.contracts.ModelVersion;
 import com.flowableplus.contracts.PublicationContract;
 import com.flowableplus.contracts.PublicationEnvelope;
 import com.flowableplus.contracts.PublicationResult;
+import com.flowableplus.contracts.PublicationStatus;
 import com.flowableplus.contracts.VersionState;
 import com.flowableplus.modeler.model.ModelProjectEntity;
 import com.flowableplus.modeler.model.ModelVersionEntity;
@@ -52,16 +53,25 @@ public class ModelerPublicationClient {
                 new DocumentPayload(project.getModelType(), fileName(project), version.getXml()),
                 formSchema, idempotencyKey, correlationId, actorId);
 
-        return restClient.post()
-                .uri(publicationBaseUrl + "/api/publications")
-                .header(PublicationContract.API_VERSION_HEADER, PublicationContract.CURRENT_API_VERSION)
-                .header(PublicationContract.CORRELATION_ID_HEADER, correlationId)
-                .header(PublicationContract.IDEMPOTENCY_KEY_HEADER, idempotencyKey)
-                .header("Authorization", bearerToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(envelope)
-                .retrieve()
-                .body(PublicationResult.class);
+        try {
+            return restClient.post()
+                    .uri(publicationBaseUrl + "/api/publications")
+                    .header(PublicationContract.API_VERSION_HEADER, PublicationContract.CURRENT_API_VERSION)
+                    .header(PublicationContract.CORRELATION_ID_HEADER, correlationId)
+                    .header(PublicationContract.IDEMPOTENCY_KEY_HEADER, idempotencyKey)
+                    .header("Authorization", bearerToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(envelope)
+                    .retrieve()
+                    .body(PublicationResult.class);
+        } catch (org.springframework.web.client.RestClientException exception) {
+            return new PublicationResult(
+                    PublicationStatus.FAILED,
+                    correlationId,
+                    null,
+                    "PUBLICATION_TRANSPORT_FAILED",
+                    "The publication request timed out or could not be delivered to the work app.");
+        }
     }
 
     private String fileName(ModelProjectEntity project) {

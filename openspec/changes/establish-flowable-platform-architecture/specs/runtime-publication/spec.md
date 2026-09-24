@@ -20,9 +20,9 @@ A publication SHALL identify the client, model key, model type, immutable versio
 ### Requirement: Publication SHALL be idempotent
 The publication boundary SHALL treat repeated requests for the same client, model version, and correlation identifier as one logical publication and SHALL not create duplicate active deployments.
 
-#### Scenario: Retry an already accepted publication
-- **WHEN** the modeler retries a publication after an uncertain network result
-- **THEN** the receiving runtime returns the existing publication result without duplicating the deployment
+#### Scenario: Receive a duplicate publication
+- **WHEN** the work app receives repeated requests for the same client, model version, and idempotency key
+- **THEN** it returns the existing publication result without creating a duplicate deployment
 
 ### Requirement: Publication SHALL expose lifecycle status
 The modeler and work applications SHALL expose publication states sufficient to distinguish accepted, validating, active, failed, and superseded versions, including failure details when activation fails.
@@ -34,6 +34,10 @@ The modeler and work applications SHALL expose publication states sufficient to 
 #### Scenario: Query a failed publication
 - **WHEN** activation fails due to an invalid or unsupported runtime definition
 - **THEN** the system returns a failed state with a safe diagnostic and keeps the previous active version unchanged
+
+#### Scenario: Publication transport failure
+- **WHEN** the modeler cannot receive a response because of timeout or connection failure
+- **THEN** the modeler displays a publication error and does not mark the local version as published; the work app remains responsible for committing or rolling back its own transaction
 
 ### Requirement: Publication SHALL protect client boundaries
 The publication boundary SHALL authenticate callers and SHALL verify that the caller is authorized to publish into the target client scope before accepting or activating a model.
