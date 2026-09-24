@@ -3,11 +3,13 @@ package com.flowableplus.work.runtime;
 import java.util.List;
 import java.util.Map;
 
+import com.flowableplus.contracts.AuditEvent;
 import com.flowableplus.flowable.adapter.CaseExecution;
 import com.flowableplus.flowable.adapter.HistoryEntry;
 import com.flowableplus.flowable.adapter.ProcessExecution;
 import com.flowableplus.contracts.FormSchema;
 import com.flowableplus.contracts.RuntimeTask;
+import com.flowableplus.work.audit.AuditEventService;
 import com.flowableplus.work.security.AuthorizationPermission;
 import com.flowableplus.work.security.AuthorizationService;
 import org.springframework.http.ResponseEntity;
@@ -27,10 +29,15 @@ public class RuntimeExecutionController {
 
     private final RuntimeExecutionService service;
     private final AuthorizationService authorizationService;
+    private final AuditEventService auditEventService;
 
-    public RuntimeExecutionController(RuntimeExecutionService service, AuthorizationService authorizationService) {
+    public RuntimeExecutionController(
+            RuntimeExecutionService service,
+            AuthorizationService authorizationService,
+            AuditEventService auditEventService) {
         this.service = service;
         this.authorizationService = authorizationService;
+        this.auditEventService = auditEventService;
     }
 
     @PostMapping("/processes/{modelKey}/instances")
@@ -123,5 +130,16 @@ public class RuntimeExecutionController {
             Authentication authentication) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.TASK_VIEW);
         return service.caseHistory(clientId, instanceId, authentication.getName());
+    }
+
+    @GetMapping("/audit")
+    public List<AuditEvent> auditEvents(
+            @RequestParam String clientId,
+            @RequestParam(required = false) String target,
+            Authentication authentication) {
+        authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.TASK_VIEW);
+        return target == null || target.isBlank()
+                ? auditEventService.findForClient(clientId)
+                : auditEventService.findForTarget(clientId, target);
     }
 }
