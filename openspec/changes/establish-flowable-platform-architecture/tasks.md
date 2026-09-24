@@ -66,7 +66,7 @@
 - [x] 9.2 Implement synchronous publication failure handling in the modeler; treat timeout and transport failures as ordinary errors without retry or status polling, display safe failure details, and verify duplicate/concurrent requests are idempotent and failed publication never replaces the last active version.
 - [x] 9.3 Execute the full BPMN vertical slice from model creation through task completion and audit lookup; verify it passes with two clients and includes negative cross-client assertions.
 - [x] 9.4 Execute the full CMMN vertical slice from case creation through supported case execution and case status inspection; verify all elements in the first-release capability matrix behave as declared.
-- [ ] 9.5 Clarify deployment topology, local startup commands, service URLs, secrets handling, and client-runtime provisioning for developer environments; verify a new developer can start both apps and execute the vertical slice from documented instructions.
+- [x] 9.5 Clarify deployment topology, local startup commands, service URLs, secrets handling, and client-runtime provisioning for developer environments; verify a new developer can start both apps and execute the vertical slice from documented instructions.
 
 ## 10. Hardening, observability, and release readiness
 
