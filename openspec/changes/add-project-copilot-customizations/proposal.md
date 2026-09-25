@@ -28,3 +28,9 @@ None.
 ## Impact
 
 The change affects `.github` customization files, OpenSpec project rules, and related planning documentation. It must not alter Java, frontend, database, runtime, API, or deployment behavior. The resulting guidance should reduce repeated repository discovery while avoiding duplicate instructions, vague skills, and always-loaded context that is unrelated to the current task. Future proposals must record whether the change affects agent guidance and identify the affected files when it does. Any repeated behavior in instructions or skills must be a concise implementation or validation projection linked to the authoritative spec, not a second copy of the requirement.
+
+## Agent Impact
+
+- **Decision:** Existing customization must be updated and new narrowly scoped customization is required. This change adds `.github/copilot-instructions.md`, three file-scoped instruction files, three workflow skills, and project rules in `openspec/config.yaml`.
+- **Source-of-truth classification:** OpenSpec specs own observable behavior; `docs/` owns repository contracts and operations; instructions own concise implementation constraints; skills own repeatable procedures and validation. Repeated high-risk invariants remain linked projections rather than copied requirements.
+- **Tasks:** Tasks 1 and 2 implement the affected guidance; task 3 validates metadata, source-of-truth separation, CLI discoverability, and repository compatibility.
