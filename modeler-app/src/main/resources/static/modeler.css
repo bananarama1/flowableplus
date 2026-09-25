@@ -1,6 +1,20 @@
+.empty-state { padding: 16px 10px; color: var(--muted); font-size: 12px; }
+.error-message { color: #a4513d; }
+.model-meta { margin: -8px 0 12px; color: var(--muted); font-size: 12px; }
+.version { width: 100%; color: var(--ink); text-align: left; background: transparent; cursor: pointer; }
+.version.selected { background: #e8f0f2; }
+.version:hover { background: #edf3f4; }
+.source-save + .source-save { margin-top: 8px; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+.form-message { min-height: 18px; color: #a4513d; font-size: 12px; }
+dialog { width: min(360px, calc(100vw - 32px)); padding: 22px; color: var(--ink); border: 1px solid var(--line); box-shadow: 0 12px 34px #243b4a2b; }
+dialog::backdrop { background: #17212b66; }
+dialog h2 { margin: 0 0 16px; font-size: 18px; }
+dialog label { display: block; margin: 12px 0; color: var(--muted); font-size: 12px; }
+dialog input, dialog select { display: block; width: 100%; padding: 8px; margin-top: 5px; border: 1px solid var(--line); }
 :root { color-scheme: light; --ink: #17212b; --muted: #6f7c86; --line: #dce3e7; --paper: #fbfcfb; --blue: #1769aa; --blue-soft: #e5f1fa; --amber: #e7a72f; }
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 960px; color: var(--ink); background: #eef2f1; font: 14px/1.4 "Segoe UI", sans-serif; }
+body { margin: 0; min-width: 0; color: var(--ink); background: #eef2f1; font: 14px/1.4 "Segoe UI", sans-serif; }
 button, input, select { font: inherit; }
 button { border: 0; cursor: pointer; }
 .app-shell { height: 100vh; min-height: 680px; display: flex; flex-direction: column; background: var(--paper); }
@@ -13,3 +27,28 @@ button { border: 0; cursor: pointer; }
 @media (max-width: 1100px) { .workspace { grid-template-columns: 190px minmax(500px, 1fr) 240px; } .canvas-grid { transform: scale(.82); } }
 .properties textarea { display: block; width: 100%; padding: 8px; margin: 10px 0; color: var(--ink); border: 1px solid var(--line); background: #fff; font: 11px/1.4 Consolas, monospace; resize: vertical; }.source-save { width: 100%; }
 .editor-library-toolbar { position: absolute; z-index: 3; top: 10px; right: 14px; display: flex; align-items: end; gap: 10px; padding: 6px; background: #ffffffdd; border: 1px solid var(--line); }.editor-library-toolbar label { color: var(--muted); font-size: 11px; }.editor-library-toolbar select { display: block; margin-top: 2px; padding: 4px; border: 1px solid var(--line); }.editor-library-toolbar span { color: var(--muted); font-size: 11px; }.editor-library-toolbar span[data-state="error"] { color: #b97b13; }.editor-library-toolbar .secondary { padding: 5px 8px; }.canvas-wrap #editor-canvas { width: 100%; height: 100%; }.canvas-wrap #editor-canvas .djs-container { background: transparent; }.cmmn-editor-notice { display: grid; gap: 12px; max-width: 360px; padding: 24px; background: #fff; border: 1px solid #9bb7c5; box-shadow: 0 2px 4px #243b4a12; }.cmmn-editor-notice span, .cmmn-editor-notice small, .cmmn-editor-notice label { color: var(--muted); }.cmmn-editor-notice select { display: block; width: 100%; margin-top: 4px; padding: 6px; border: 1px solid var(--line); }.fallback-diagram { display: none; }
+@media (max-width: 640px) {
+	.app-shell { min-height: 100vh; height: auto; }
+	.topbar { height: auto; min-height: 58px; flex-wrap: wrap; gap: 10px; padding: 10px 14px; }
+	.topbar-context { order: 3; width: 100%; }
+	.topbar-actions { margin-left: auto; }
+	.save-state { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.workspace { display: flex; flex-direction: column; }
+	.sidebar, .properties { border: 0; }
+	.sidebar { padding: 14px 10px; }
+	.project-list { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+	.project { min-width: 190px; border: 1px solid var(--line); }
+	.sidebar-footer { display: none; }
+	.editor-area { min-height: 560px; order: 2; }
+	.properties { order: 3; padding: 16px; }
+	.tabs { overflow-x: auto; }
+	.editor-toolbar { flex-wrap: wrap; gap: 8px; }
+	.toolbar-end { width: 100%; margin-left: 0; }
+	.canvas-wrap { min-height: 330px; }
+	.editor-library-toolbar { position: relative; top: auto; right: auto; align-self: stretch; flex-wrap: wrap; margin: 8px; }
+	.canvas-wrap #editor-canvas { min-height: 270px; }
+	.canvas-label { top: 58px; }
+	.validation-bar { flex-wrap: wrap; gap: 6px; padding: 10px 14px; }
+	.validation-bar .muted { width: 100%; }
+	.source-save { margin-top: 8px; }
+}

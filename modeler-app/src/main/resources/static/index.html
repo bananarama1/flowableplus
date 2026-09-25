@@ -10,51 +10,46 @@
 <main class="app-shell">
     <header class="topbar">
         <div class="brand"><span class="brand-mark">F+</span><span>Modeler</span></div>
-        <div class="topbar-context"><span class="eyebrow">CLIENT</span><strong>Northstar Operations</strong></div>
-        <div class="topbar-actions"><span class="save-state">Saved a moment ago</span><button class="avatar" aria-label="Open account menu">AL</button></div>
+        <div class="topbar-context"><span class="eyebrow">CLIENT</span><strong id="client-context">Loading client...</strong></div>
+        <div class="topbar-actions"><span class="save-state" id="save-state">Select a project</span><button class="avatar" aria-label="Open account menu">AL</button></div>
     </header>
     <div class="workspace">
         <aside class="sidebar" aria-label="Project navigation">
-            <div class="sidebar-heading"><span>Projects</span><button class="icon-button" aria-label="Create project">+</button></div>
-            <nav class="project-list">
-                <a class="project active" href="#"><span class="project-dot blue"></span><span><strong>Order intake</strong><small>BPMN · v3 draft</small></span></a>
-                <a class="project" href="#"><span class="project-dot amber"></span><span><strong>Customer onboarding</strong><small>CMMN · v1 published</small></span></a>
-                <a class="project" href="#"><span class="project-dot green"></span><span><strong>Invoice review</strong><small>BPMN · v5 published</small></span></a>
-            </nav>
+            <div class="sidebar-heading"><span>Projects</span><button class="icon-button" id="create-project" aria-label="Create project">+</button></div>
+            <nav class="project-list" id="project-list" aria-live="polite"><div class="empty-state">Loading projects...</div></nav>
             <div class="sidebar-footer"><a href="#">Validation rules</a><a href="#">Publication history</a></div>
         </aside>
         <section class="editor-area">
-            <div class="tabs" role="tablist" aria-label="Open models"><button class="tab active" role="tab" aria-selected="true">Order intake <span>×</span></button><button class="tab" role="tab" aria-selected="false">Customer onboarding <span>×</span></button><button class="new-tab" aria-label="Open another model">+</button></div>
+            <div class="tabs" id="model-tabs" role="tablist" aria-label="Open models"><span class="empty-tab">No project selected</span><button class="new-tab" aria-label="Open another model">+</button></div>
             <div class="editor-toolbar"><div class="toolbar-group"><button class="tool active">Select</button><button class="tool">Connect</button><button class="tool">Hand</button></div><div class="toolbar-group"><button class="tool">Zoom −</button><button class="tool">100%</button><button class="tool">Zoom +</button></div><div class="toolbar-group toolbar-end"><button class="secondary" id="validate-model" type="button">Validate</button><button class="primary" id="publish-model" type="button">Publish version</button></div></div>
             <div class="canvas-wrap">
                 <div class="editor-library-toolbar"><label>Editor<select id="editor-type"><option value="BPMN">BPMN 2.0</option><option value="CMMN">CMMN 1.1</option></select></label><button class="secondary" id="roundtrip-model" type="button">Round-trip XML</button><span id="editor-library-status">Loading editor...</span></div>
                 <div id="editor-canvas"></div>
-                <div class="canvas-label"><span class="status-dot"></span> BPMN 2.0 · Draft v3</div>
-                <div class="canvas-grid fallback-diagram">
-                    <div class="flow start">Start</div><div class="flow-arrow">→</div><div class="flow task"><b>Capture order</b><small>Order form</small></div><div class="flow-arrow">→</div><div class="flow gateway">×</div><div class="flow-arrow">→</div><div class="flow task selected"><b>Review order</b><small>Assigned: sales-team</small></div><div class="flow-arrow">→</div><div class="flow end">End</div>
-                </div>
-                <div class="canvas-hint">Select an element to inspect its properties</div>
+                <div class="canvas-label" id="canvas-label"><span class="status-dot"></span> No version selected</div>
+                <div class="canvas-hint" id="canvas-hint">Select a project to open a model</div>
             </div>
-            <div class="validation-bar"><strong>Validation</strong><span class="check" id="validation-icon">✓</span><span id="validation-message">All checks passed</span><span class="muted" id="publication-status">Last checked 14:32</span></div>
+            <div class="validation-bar" role="status" aria-live="polite"><strong>Validation</strong><span class="check" id="validation-icon">!</span><span id="validation-message">Select a version to validate</span><span class="muted" id="publication-status"></span></div>
         </section>
         <aside class="properties" aria-label="Model properties">
             <div class="panel-title"><span>Properties</span><button class="icon-button" aria-label="Close properties">×</button></div>
-            <div class="element-badge"><span class="task-icon">□</span><span><strong>User task</strong><small>review-order</small></span></div>
-            <label>Name<input value="Review order"></label>
-            <label>Assignment<input value="sales-team"></label>
-            <label>Form reference<select><option>order-review-v1</option></select></label>
-            <div class="section-label">Variables <button class="inline-action">Add</button></div>
-            <div class="variable"><span>orderTotal</span><small>decimal · required</small></div>
-            <div class="variable"><span>approvalNote</span><small>string · optional</small></div>
-            <div class="section-label">Version history</div>
-            <div class="version"><span><strong>v3</strong> Draft</span><small>Today, 14:28</small></div>
-            <div class="version"><span><strong>v2</strong> Published</span><small>Yesterday, 09:16</small></div>
+            <div id="model-properties"><div class="empty-state">Select a project to inspect its properties.</div></div>
             <div class="section-label">Source document</div>
-            <textarea id="source-xml" rows="7" aria-label="Model source XML"><definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"><process id="order-intake" name="Order intake"><startEvent id="start"/><userTask id="review-order" name="Review order"/></process></definitions></textarea>
+            <textarea id="source-xml" rows="7" aria-label="Model source XML" placeholder="Select a version to load its XML"></textarea>
+            <button class="secondary source-save" id="create-draft" type="button" hidden>Create draft from published</button>
             <button class="secondary source-save" id="save-draft" type="button">Save draft</button>
         </aside>
     </div>
 </main>
+<dialog id="project-dialog">
+    <form method="dialog" id="project-form">
+        <h2>Create project</h2>
+        <label>Model key<input name="modelKey" required pattern="[A-Za-z0-9._-]+"></label>
+        <label>Display name<input name="displayName" required></label>
+        <label>Model type<select name="modelType"><option value="BPMN">BPMN 2.0</option><option value="CMMN">CMMN 1.1</option></select></label>
+        <div class="dialog-actions"><button class="secondary" value="cancel">Cancel</button><button class="primary" value="default">Create project</button></div>
+        <p class="form-message" id="project-message" role="alert"></p>
+    </form>
+</dialog>
 <script src="/modeler.js"></script>
 <script src="/modeler-editor.js"></script>
 </body>

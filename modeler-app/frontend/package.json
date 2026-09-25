@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "esbuild src/editor.js --bundle --format=iife --outfile=../src/main/resources/static/modeler-editor.js --minify",
-    "test": "esbuild test/editor-roundtrip.test.js --bundle --platform=node --format=esm --outfile=.test-build/editor-roundtrip.test.mjs && node --test .test-build/editor-roundtrip.test.mjs"
+    "test": "esbuild test/editor-roundtrip.test.js --bundle --platform=node --format=esm --outfile=.test-build/editor-roundtrip.test.mjs && node --test .test-build/editor-roundtrip.test.mjs",
+    "test:browser": "node --test test/modeler-shell.browser.test.js"
   },
   "dependencies": {
     "bpmn-js": "^18.29.1",
@@ -12,6 +13,7 @@
     "cmmn-moddle": "^5.0.0"
   },
   "devDependencies": {
-    "esbuild": "^0.25.0"
+    "esbuild": "^0.25.0",
+    "playwright": "^1.55.0"
   }
 }

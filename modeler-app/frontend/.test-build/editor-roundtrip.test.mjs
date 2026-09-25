@@ -10624,3 +10624,16 @@ test("modeler Save draft persists the current model and keeps advanced collabora
   assert.match(modeler, /Draft saved/);
   assert.match(modeler, /Draft could not be saved/);
 });
+test("modeler workspace renders server state without sample project leakage", async () => {
+  const html = await readFile(new URL("../../src/main/resources/static/index.html", import.meta.url), "utf8");
+  const modeler = await readFile(new URL("../../src/main/resources/static/modeler.js", import.meta.url), "utf8");
+  const css = await readFile(new URL("../../src/main/resources/static/modeler.css", import.meta.url), "utf8");
+  assert.doesNotMatch(html, /Northstar Operations|Order intake|Customer onboarding/);
+  assert.match(modeler, /history\.replaceState/);
+  assert.match(modeler, /\/api\/modeler\/projects\?clientId=/);
+  assert.match(modeler, /sessionStorage\.getItem\('flowableplus\.accessToken'\)/);
+  assert.match(modeler, /method = .*'PUT'/);
+  assert.match(modeler, /\/api\/modeler\/versions\/.*\/draft\?clientId=/);
+  assert.match(modeler, /state === 'PUBLISHED'/);
+  assert.match(css, /@media \(max-width: 640px\)/);
+});

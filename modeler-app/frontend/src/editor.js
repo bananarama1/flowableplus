@@ -65,16 +65,19 @@ async function exportCurrent() {
     return currentXml;
 }
 
-window.FlowablePlusEditor = { importBpmn, importCmmn, exportCurrent };
-document.querySelector('#editor-type').addEventListener('change', async (event) => {
-    currentType = event.target.value;
+async function setModel(type, xml) {
+    currentType = type;
+    document.querySelector('#editor-type').value = type;
     if (currentType === 'BPMN') {
         canvas.replaceChildren();
         await modeler.attachTo(canvas);
-        await importBpmn(BPMN_XML);
+        await importBpmn(xml);
     } else {
-        await importCmmn(CMMN_XML);
+        await importCmmn(xml);
     }
-});
+}
+
+window.FlowablePlusEditor = { importBpmn, importCmmn, setModel, exportCurrent };
 document.querySelector('#roundtrip-model').addEventListener('click', () => exportCurrent().catch(() => setStatus('XML round-trip failed', false)));
-importBpmn(BPMN_XML).catch(() => setStatus('BPMN editor failed to load', false));
+setStatus('Select a project to load a model');
+window.dispatchEvent(new Event('flowableplus-editor-ready'));

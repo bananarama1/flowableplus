@@ -11,8 +11,11 @@ import com.flowableplus.modeler.validation.ModelValidationResult;
 import com.flowableplus.modeler.publication.ModelerPublicationClient;
 import com.flowableplus.modeler.publication.PublicationRecordEntity;
 import com.flowableplus.modeler.publication.PublicationRecordService;
+import com.flowableplus.modeler.security.AuthorizationPermission;
+import com.flowableplus.modeler.security.AuthorizationService;
 import com.flowableplus.contracts.PublicationResult;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,52 +35,68 @@ public class ModelerModelController {
     private final ModelDocumentValidator validator;
     private final ModelerPublicationClient publicationClient;
     private final PublicationRecordService publicationRecordService;
+    private final AuthorizationService authorizationService;
 
     public ModelerModelController(
             ModelProjectService projectService,
             ModelVersionService versionService,
             ModelDocumentValidator validator,
             ModelerPublicationClient publicationClient,
-            PublicationRecordService publicationRecordService) {
+            PublicationRecordService publicationRecordService,
+            AuthorizationService authorizationService) {
         this.projectService = projectService;
         this.versionService = versionService;
         this.validator = validator;
         this.publicationClient = publicationClient;
         this.publicationRecordService = publicationRecordService;
+        this.authorizationService = authorizationService;
     }
 
     @GetMapping("/projects")
-    public List<ModelProjectEntity> projects(@RequestParam String clientId) {
+    public List<ModelProjectEntity> projects(@RequestParam String clientId, Authentication authentication) {
+        authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.MODEL_EDIT);
         return projectService.findForClient(clientId);
     }
 
     @PostMapping("/projects")
     public ModelProjectEntity createProject(
-            @RequestParam String clientId, @RequestBody ProjectRequest request) {
+            @RequestParam String clientId, @RequestBody ProjectRequest request, Authentication authentication) {
+        authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.MODEL_EDIT);
         return projectService.create(clientId, request.modelKey(), request.modelType(), request.displayName(), request.ownerId());
     }
 
     @GetMapping("/projects/{projectId}/versions")
     public List<ModelVersionEntity> versions(
-            @RequestParam String clientId, @PathVariable String projectId) {
+            @RequestParam String clientId, @PathVariable String projectId, Authentication authentication) {
+        authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.MODEL_EDIT);
         return versionService.findForProject(clientId, projectId);
     }
 
     @PostMapping("/projects/{projectId}/versions")
     public ModelVersionEntity saveDraft(
-            @RequestParam String clientId, @PathVariable String projectId, @RequestBody DocumentRequest request) {
+            @RequestParam String clientId, @PathVariable String projectId, @RequestBody DocumentRequest request, Authentication authentication) {
+        authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.MODEL_EDIT);
         return versionService.saveDraft(clientId, projectId, request.xml());
     }
 
     @PutMapping("/versions/{versionId}")
     public ModelVersionEntity updateDraft(
-            @RequestParam String clientId, @PathVariable String versionId, @RequestBody DocumentRequest request) {
+            @RequestParam String clientId, @PathVariable String versionId, @RequestBody DocumentRequest request, Authentication authentication) {
+        authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.MODEL_EDIT);
         return versionService.updateDraft(clientId, versionId, request.xml());
+    }
+
+    @PostMapping("/versions/{versionId}/draft")
+    public ModelVersionEntity createDraftFromPublished(
+            @RequestParam String clientId, @PathVariable String versionId, Authentication authentication) {
+        authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.MODEL_EDIT);
+        return versionService.createDraftFromPublished(clientId, versionId);
     }
 
     @PostMapping("/versions/{versionId}/validate")
     public ModelValidationResult validate(
-            @RequestParam String clientId, @PathVariable String versionId, @RequestBody ValidationRequest request) {
+            @RequestParam String clientId, @PathVariable String versionId, @RequestBody ValidationRequest request, Authentication authentication) {
+        authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.MODEL_VALIDATE);
         ModelVersionEntity version = versionService.findAuthorized(clientId, versionId);
         return validator.validate(request.modelType(), version.getXml(), request.formSchema(), correlationId(request.correlationId()));
     }
@@ -85,7 +104,8 @@ public class ModelerModelController {
     @PostMapping("/versions/{versionId}/publish")
     public ResponseEntity<?> publish(
             @RequestParam String clientId, @PathVariable String versionId, @RequestBody PublishRequest request,
-            @RequestHeader("Authorization") String authorization) {
+            @RequestHeader("Authorization") String authorization, Authentication authentication) {
+        authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.MODEL_PUBLISH);
         ModelVersionEntity version = versionService.findAuthorized(clientId, versionId);
         ModelProjectEntity project = projectService.findAuthorized(clientId, version.getProjectId());
         String correlationId = correlationId(request.correlationId());
