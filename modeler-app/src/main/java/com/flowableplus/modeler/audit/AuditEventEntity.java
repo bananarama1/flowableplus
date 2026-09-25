@@ -6,6 +6,7 @@ import java.util.UUID;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 
 @Entity
 @Table(name = "audit_event")
@@ -14,6 +15,7 @@ public class AuditEventEntity {
     private String actorId;
     private String clientId;
     private String target;
+    @Column(nullable = false)
     private Instant timestamp;
     private String operation;
     private String outcome;

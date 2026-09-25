@@ -9,6 +9,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 
 @Entity
 @Table(name = "publication_record")
@@ -16,16 +17,24 @@ public class PublicationRecordEntity {
 
     @Id
     private String id;
+    @Column(nullable = false)
     private String clientId;
+    @Column(nullable = false)
     private String modelKey;
+    @Column(nullable = false)
     private String versionId;
+    @Column(nullable = false)
     private String actorId;
+    @Column(nullable = false)
     private Instant createdAt;
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private PublicationStatus status;
     private String runtimeReference;
     private String failureDetails;
+    @Column(nullable = false)
     private String correlationId;
+    @Column(nullable = false)
     private boolean active;
 
     protected PublicationRecordEntity() {

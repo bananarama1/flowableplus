@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: work-1
+      author: flowableplus
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'audit_event'"
+      changes:
+        - createTable:
+            tableName: audit_event
+            columns:
+              - column:
+                  name: id
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: actor_id
+                  type: varchar(255)
+              - column:
+                  name: client_id
+                  type: varchar(255)
+              - column:
+                  name: target
+                  type: varchar(255)
+              - column:
+                  name: timestamp
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: operation
+                  type: varchar(255)
+              - column:
+                  name: outcome
+                  type: varchar(255)
+              - column:
+                  name: correlation_id
+                  type: varchar(255)

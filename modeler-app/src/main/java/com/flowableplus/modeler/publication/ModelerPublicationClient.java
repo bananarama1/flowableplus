@@ -18,23 +18,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 @Service
 public class ModelerPublicationClient {
 
+    private static final Logger log = LoggerFactory.getLogger(ModelerPublicationClient.class);
+
     private final RestClient restClient;
     private final String publicationBaseUrl;
+    private final PublicationMetrics metrics;
 
     @Autowired
     public ModelerPublicationClient(
             RestClient.Builder restClientBuilder,
-            @Value("${flowableplus.modeler.publication.base-url:http://localhost:8081}") String publicationBaseUrl) {
-        this(restClientBuilder.build(), publicationBaseUrl);
+            @Value("${flowableplus.modeler.publication.base-url:http://localhost:8081}") String publicationBaseUrl,
+            PublicationMetrics metrics) {
+        this(restClientBuilder.build(), publicationBaseUrl, metrics);
     }
 
     ModelerPublicationClient(RestClient restClient, String publicationBaseUrl) {
+        this(restClient, publicationBaseUrl, new PublicationMetrics(new SimpleMeterRegistry()));
+    }
+
+    ModelerPublicationClient(RestClient restClient, String publicationBaseUrl, PublicationMetrics metrics) {
         this.restClient = restClient;
         this.publicationBaseUrl = publicationBaseUrl.replaceAll("/$", "");
+        this.metrics = metrics;
     }
 
     public PublicationResult publish(
@@ -44,6 +56,7 @@ public class ModelerPublicationClient {
             String actorId,
             String correlationId,
             String bearerToken) {
+        metrics.request();
         String idempotencyKey = project.getClientId() + ":" + project.getModelKey() + ":" + version.getVersionNumber();
         ModelIdentity identity = new ModelIdentity(
                 new ClientScope(project.getClientId()), project.getModelKey(), project.getModelType(), project.getDisplayName());
@@ -54,7 +67,7 @@ public class ModelerPublicationClient {
                 formSchema, idempotencyKey, correlationId, actorId);
 
         try {
-            return restClient.post()
+            PublicationResult result = restClient.post()
                     .uri(publicationBaseUrl + "/api/publications")
                     .header(PublicationContract.API_VERSION_HEADER, PublicationContract.CURRENT_API_VERSION)
                     .header(PublicationContract.CORRELATION_ID_HEADER, correlationId)
@@ -64,7 +77,19 @@ public class ModelerPublicationClient {
                     .body(envelope)
                     .retrieve()
                     .body(PublicationResult.class);
+            if (result != null && result.status() == PublicationStatus.ACTIVE) {
+                metrics.active();
+            } else {
+                metrics.failed();
+            }
+            log.info("event=publication_response correlationId={} clientId={} modelKey={} version={} status={}",
+                    correlationId, project.getClientId(), project.getModelKey(), version.getVersionNumber(),
+                    result == null ? "EMPTY" : result.status());
+            return result;
         } catch (org.springframework.web.client.RestClientException exception) {
+            metrics.failed();
+            log.warn("event=publication_transport_failure correlationId={} clientId={} modelKey={} version={}",
+                    correlationId, project.getClientId(), project.getModelKey(), version.getVersionNumber());
             return new PublicationResult(
                     PublicationStatus.FAILED,
                     correlationId,

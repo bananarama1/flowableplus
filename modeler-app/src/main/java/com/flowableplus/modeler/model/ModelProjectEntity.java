@@ -9,6 +9,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 
 @Entity
 @Table(name = "model_project")
@@ -16,14 +17,21 @@ public class ModelProjectEntity {
 
     @Id
     private String id;
+    @Column(nullable = false)
     private String clientId;
+    @Column(nullable = false)
     private String modelKey;
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ModelType modelType;
+    @Column(nullable = false)
     private String displayName;
+    @Column(nullable = false)
     private String ownerId;
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ModelLifecycleState lifecycleState;
+    @Column(nullable = false)
     private Instant createdAt;
 
     protected ModelProjectEntity() {

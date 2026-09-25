@@ -55,13 +55,13 @@ Open two PowerShell terminals in the repository root.
 Terminal 1, modeler:
 
 ```powershell
-.\mvnw.cmd -pl modeler-app spring-boot:run -Dspring-boot.run.profiles=local
+.\mvnw.cmd -pl modeler-app spring-boot:run '-Dspring-boot.run.profiles=local'
 ```
 
 Terminal 2, work app:
 
 ```powershell
-.\mvnw.cmd -pl work-app spring-boot:run -Dspring-boot.run.profiles=local
+.\mvnw.cmd -pl work-app spring-boot:run '-Dspring-boot.run.profiles=local'
 ```
 
 Verify both services before using the APIs:

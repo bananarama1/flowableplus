@@ -17,15 +17,22 @@ import com.flowableplus.flowable.adapter.DeploymentReference;
 import com.flowableplus.flowable.adapter.FlowableRuntimeAdapter;
 import com.flowableplus.flowable.runtime.ClientRuntimeRegistry;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import com.flowableplus.work.audit.AuditEventService;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class PublicationIntakeService {
+
+    private static final Logger log = LoggerFactory.getLogger(PublicationIntakeService.class);
 
     private final ClientRuntimeRegistry runtimeRegistry;
     private final FlowableRuntimeAdapter runtimeAdapter;
     private final RuntimeCompatibilityValidator compatibilityValidator;
     private final AuditEventService auditEventService;
+    private final PublicationMetrics metrics;
     private final Map<String, PublicationResult> publications = new ConcurrentHashMap<>();
     private final Map<String, PublicationResult> activePublications = new ConcurrentHashMap<>();
     private final Map<String, RuntimeDefinition> activeDefinitions = new ConcurrentHashMap<>();
@@ -36,13 +43,27 @@ public class PublicationIntakeService {
             FlowableRuntimeAdapter runtimeAdapter,
             RuntimeCompatibilityValidator compatibilityValidator,
             AuditEventService auditEventService) {
+        this(runtimeRegistry, runtimeAdapter, compatibilityValidator, auditEventService,
+                new PublicationMetrics(new SimpleMeterRegistry()));
+    }
+
+    @Autowired
+    public PublicationIntakeService(
+            ClientRuntimeRegistry runtimeRegistry,
+            FlowableRuntimeAdapter runtimeAdapter,
+            RuntimeCompatibilityValidator compatibilityValidator,
+            AuditEventService auditEventService,
+            PublicationMetrics metrics) {
         this.runtimeRegistry = runtimeRegistry;
         this.runtimeAdapter = runtimeAdapter;
         this.compatibilityValidator = compatibilityValidator;
         this.auditEventService = auditEventService;
+        this.metrics = metrics;
     }
 
     public synchronized IntakeResult accept(PublicationEnvelope envelope, String actorId) {
+        metrics.request();
+        log.info("event=publication_received correlationId={} actorId={}", correlationId(envelope), actorId);
         List<StructuredError> errors = PublicationContract.validate(envelope);
         if (isBlank(actorId)) {
             errors = append(errors, new StructuredError(
@@ -52,6 +73,7 @@ public class PublicationIntakeService {
                     "ACTOR_MISMATCH", "Authenticated actor does not match the publication actor", envelope.correlationId(), List.of()));
         }
         if (!errors.isEmpty()) {
+            metrics.failed();
             return IntakeResult.rejected(errors);
         }
 
@@ -60,13 +82,17 @@ public class PublicationIntakeService {
                 + "|" + envelope.version().version() + "|" + envelope.idempotencyKey();
         PublicationResult existing = publications.get(publicationKey);
         if (existing != null) {
+            metrics.duplicate();
             auditEventService.record(actorId, clientId, envelope.model().modelKey(), "PUBLICATION", "DUPLICATE", envelope.correlationId());
+            log.info("event=publication_duplicate correlationId={} clientId={} modelKey={} version={}",
+                    envelope.correlationId(), clientId, envelope.model().modelKey(), envelope.version().version());
             return IntakeResult.accepted(existing, true);
         }
 
         runtimeRegistry.resolve(clientId);
         if (envelope.version().state() != VersionState.VALIDATED
                 && envelope.version().state() != VersionState.PUBLISHED) {
+            metrics.failed();
             PublicationResult rejected = new PublicationResult(
                     PublicationStatus.FAILED, envelope.correlationId(), null,
                     "VERSION_NOT_VALIDATED", "Only validated model versions can be published");
@@ -77,6 +103,7 @@ public class PublicationIntakeService {
 
         List<StructuredError> compatibilityErrors = compatibilityValidator.validate(envelope);
         if (!compatibilityErrors.isEmpty()) {
+            metrics.failed();
             PublicationResult rejected = new PublicationResult(
                     PublicationStatus.FAILED, envelope.correlationId(), null,
                     compatibilityErrors.get(0).code(), compatibilityErrors.get(0).message());
@@ -92,6 +119,10 @@ public class PublicationIntakeService {
             };
             PublicationResult active = new PublicationResult(
                     PublicationStatus.ACTIVE, envelope.correlationId(), deployment.deploymentId(), null, null);
+                metrics.active();
+                log.info("event=flowable_deployment_active correlationId={} clientId={} modelKey={} version={} deploymentId={}",
+                    envelope.correlationId(), clientId, envelope.model().modelKey(), envelope.version().version(),
+                    deployment.deploymentId());
             publications.put(publicationKey, active);
                 activePublications.put(activeKey(envelope), active);
                 activeDefinitions.put(activeKey(envelope), new RuntimeDefinition(
@@ -103,6 +134,10 @@ public class PublicationIntakeService {
                 auditEventService.record(actorId, clientId, envelope.model().modelKey(), "PUBLICATION", "ACTIVE", envelope.correlationId());
             return IntakeResult.accepted(active, false);
         } catch (RuntimeException exception) {
+            metrics.failed();
+            log.warn("event=flowable_deployment_failed correlationId={} clientId={} modelKey={} version={} reason={}",
+                envelope.correlationId(), clientId, envelope.model().modelKey(), envelope.version().version(),
+                exception.getClass().getSimpleName());
             PublicationResult failed = new PublicationResult(
                     PublicationStatus.FAILED, envelope.correlationId(), null,
                     "RUNTIME_DEPLOYMENT_FAILED", "The runtime rejected the publication");

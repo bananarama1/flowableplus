@@ -1,0 +1,219 @@
+databaseChangeLog:
+  - changeSet:
+      id: modeler-1
+      author: flowableplus
+      validCheckSum: 9:024366612a98bb5f7a3429352eb45069
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: "0"
+            sql: "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'model_project'"
+      changes:
+        - createTable:
+            tableName: model_project
+            columns:
+              - column:
+                  name: id
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: client_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: model_key
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: model_type
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: display_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: owner_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: lifecycle_state
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: model_project
+            columnNames: client_id, model_key
+            constraintName: uq_model_project_client_key
+        - createTable:
+            tableName: model_version
+            columns:
+              - column:
+                  name: id
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: client_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: project_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version_number
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: xml
+                  type: varchar(1000000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: state
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: model_version
+            columnNames: client_id, project_id, version_number
+            constraintName: uq_model_version_identity
+        - createTable:
+            tableName: publication_record
+            columns:
+              - column:
+                  name: id
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: client_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: model_key
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: actor_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: runtime_reference
+                  type: varchar(255)
+              - column:
+                  name: failure_details
+                  type: varchar(4000)
+              - column:
+                  name: correlation_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: active
+                  type: boolean
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: audit_event
+            columns:
+              - column:
+                  name: id
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: actor_id
+                  type: varchar(255)
+              - column:
+                  name: client_id
+                  type: varchar(255)
+              - column:
+                  name: target
+                  type: varchar(255)
+              - column:
+                  name: timestamp
+                  type: datetime
+                  constraints:
+                    nullable: false
+              - column:
+                  name: operation
+                  type: varchar(255)
+              - column:
+                  name: outcome
+                  type: varchar(255)
+              - column:
+                  name: correlation_id
+                  type: varchar(255)
+  - changeSet:
+      id: modeler-2
+      author: flowableplus
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: model_version
+        - columnExists:
+            tableName: model_version
+            columnName: xml
+      changes:
+        - modifyDataType:
+            tableName: model_version
+            columnName: xml
+            newDataType: text
+  - changeSet:
+      id: modeler-3
+      author: flowableplus
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: model_version
+        - columnExists:
+            tableName: model_version
+            columnName: xml
+      changes:
+        - modifyDataType:
+            tableName: model_version
+            columnName: xml
+            newDataType: varchar(1000000)
