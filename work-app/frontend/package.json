@@ -3,6 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test test/work-shell.test.js"
+    "test": "node --test test/work-shell.test.js",
+    "test:browser": "node --test test/work-shell.browser.test.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
   }
 }

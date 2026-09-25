@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend contracts and integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Run Maven verification
+        run: ./mvnw -B -ntp verify
+
+  frontend:
+    name: Frontend tests (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - modeler-app
+          - work-app
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: ${{ matrix.app }}/frontend/package-lock.json
+      - name: Install frontend dependencies
+        working-directory: ${{ matrix.app }}/frontend
+        run: npm ci
+      - name: Run frontend tests
+        working-directory: ${{ matrix.app }}/frontend
+        run: npm test
+      - name: Build modeler frontend
+        if: matrix.app == 'modeler-app'
+        working-directory: modeler-app/frontend
+        run: npm run build
+
+  browser:
+    name: Work frontend browser smoke tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: work-app/frontend/package-lock.json
+      - name: Install browser test dependencies
+        working-directory: work-app/frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Start work application and run browser tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          trap 'if [ -f work-app.pid ]; then kill "$(cat work-app.pid)" 2>/dev/null || true; fi' EXIT
+          ./mvnw -B -ntp -pl work-app spring-boot:run -Dspring-boot.run.arguments=--server.port=8081 > work-app.log 2>&1 &
+          echo $! > work-app.pid
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:8081/health > /dev/null; then
+              break
+            fi
+            if [ "$attempt" -eq 60 ]; then
+              cat work-app.log
+              exit 1
+            fi
+            sleep 2
+          done
+          npm --prefix work-app/frontend run test:browser
