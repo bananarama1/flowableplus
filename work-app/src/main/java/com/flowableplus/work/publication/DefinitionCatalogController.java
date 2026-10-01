@@ -32,6 +32,11 @@ public class DefinitionCatalogController {
             Authentication authentication) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.PROCESS_START);
         return ResponseEntity.ok(publicationIntakeService.activeDefinitions(
-                clientId, authentication.getName()));
+                clientId, actorId(authentication)));
+    }
+
+    private String actorId(Authentication authentication) {
+        return authentication.getPrincipal() instanceof com.flowableplus.work.security.LocalUser user
+                ? user.username() : authentication.getName();
     }
 }

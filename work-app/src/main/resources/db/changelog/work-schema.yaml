@@ -40,3 +40,83 @@ databaseChangeLog:
               - column:
                   name: correlation_id
                   type: varchar(255)
+  - changeSet:
+      id: work-2
+      author: flowableplus
+      changes:
+        - createTable:
+            tableName: publication_record
+            columns:
+              - column:
+                  name: id
+                  type: varchar(255)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: client_id
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: model_key
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: model_type
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: display_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: idempotency_key
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: correlation_id
+                  type: varchar(255)
+              - column:
+                  name: actor_id
+                  type: varchar(255)
+              - column:
+                  name: status
+                  type: varchar(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: runtime_reference
+                  type: varchar(255)
+              - column:
+                  name: failure_code
+                  type: varchar(255)
+              - column:
+                  name: failure_message
+                  type: varchar(1000)
+              - column:
+                  name: active
+                  type: boolean
+                  constraints:
+                    nullable: false
+              - column:
+                  name: form_schema_json
+                  type: clob
+              - column:
+                  name: created_at
+                  type: datetime
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: publication_record
+            columnNames: client_id, model_key, version, idempotency_key
+            constraintName: uk_publication_record_idempotency

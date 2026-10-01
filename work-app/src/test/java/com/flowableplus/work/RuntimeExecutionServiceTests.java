@@ -37,6 +37,8 @@ class RuntimeExecutionServiceTests {
         RuntimeDefinition definition = definition("client-a");
         when(publicationService.activeDefinition("client-a", "leave", ModelType.BPMN, "user-1"))
                 .thenReturn(definition);
+        when(publicationService.activeFormSchema("client-a", "leave", "user-1"))
+                .thenReturn(null);
         when(adapter.startProcess("leave", Map.of("days", 3)))
                 .thenReturn(new ProcessExecution("instance-1", "definition-1", "leave"));
 
@@ -44,6 +46,20 @@ class RuntimeExecutionServiceTests {
 
         assertThat(execution.processInstanceId()).isEqualTo("instance-1");
         verify(adapter).startProcess("leave", Map.of("days", 3));
+    }
+
+    @Test
+    void invalidStartVariablesDoNotCreateAProcess() {
+        when(publicationService.activeDefinition("client-a", "leave", ModelType.BPMN, "user-1"))
+                .thenReturn(definition("client-a"));
+        when(publicationService.activeFormSchema("client-a", "leave", "user-1"))
+                .thenReturn(new FormSchema("1", List.of(
+                        new FormField("days", "Days", FormFieldType.INTEGER, true, null, "days", List.of()))));
+
+        assertThatThrownBy(() -> service.startProcess("client-a", "leave", Map.of("days", "bad"), "user-1"))
+                .isInstanceOf(com.flowableplus.work.runtime.RuntimeStartValidationException.class);
+        org.mockito.Mockito.verify(adapter, org.mockito.Mockito.never())
+                .startProcess(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyMap());
     }
 
     @Test

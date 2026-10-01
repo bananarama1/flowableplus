@@ -41,11 +41,16 @@ public class RuntimeExecutionController {
     }
 
     @PostMapping("/processes/{modelKey}/instances")
-    public ProcessExecution startProcess(
+    public ResponseEntity<?> startProcess(
             @PathVariable String modelKey, @RequestParam String clientId,
             Authentication authentication, @RequestBody Map<String, Object> variables) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.PROCESS_START);
-        return service.startProcess(clientId, modelKey, variables, authentication.getName());
+        String actorId = actorId(authentication);
+        var errors = service.validateStart(clientId, modelKey, variables, actorId);
+        if (!errors.isEmpty()) {
+            return ResponseEntity.unprocessableEntity().body(Map.of("errors", errors));
+        }
+        return ResponseEntity.ok(service.startProcess(clientId, modelKey, variables, actorId));
     }
 
     @PostMapping("/cases/{modelKey}/instances")
@@ -53,14 +58,14 @@ public class RuntimeExecutionController {
             @PathVariable String modelKey, @RequestParam String clientId,
             Authentication authentication, @RequestBody Map<String, Object> variables) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.CASE_START);
-        return service.startCase(clientId, modelKey, variables, authentication.getName());
+        return service.startCase(clientId, modelKey, variables, actorId(authentication));
     }
 
     @GetMapping("/tasks")
     public List<RuntimeTask> tasks(
             @RequestParam String clientId, Authentication authentication) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.TASK_VIEW);
-        return service.tasks(clientId, authentication.getName());
+        return service.tasks(clientId, actorId(authentication));
     }
 
     @GetMapping("/tasks/{taskId}")
@@ -68,7 +73,7 @@ public class RuntimeExecutionController {
             @PathVariable String taskId, @RequestParam String clientId,
             Authentication authentication) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.TASK_VIEW);
-        return service.task(clientId, taskId, authentication.getName());
+        return service.task(clientId, taskId, actorId(authentication));
     }
 
     @GetMapping("/tasks/{taskId}/form")
@@ -76,7 +81,7 @@ public class RuntimeExecutionController {
             @PathVariable String taskId, @RequestParam String clientId,
             Authentication authentication) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.TASK_VIEW);
-        return service.form(clientId, taskId, authentication.getName());
+        return service.form(clientId, taskId, actorId(authentication));
     }
 
     @PostMapping("/tasks/{taskId}/claim")
@@ -84,7 +89,7 @@ public class RuntimeExecutionController {
             @PathVariable String taskId, @RequestParam String clientId,
             Authentication authentication) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.TASK_CLAIM);
-        service.claimTask(clientId, taskId, authentication.getName());
+        service.claimTask(clientId, taskId, actorId(authentication));
         return ResponseEntity.noContent().build();
     }
 
@@ -94,7 +99,7 @@ public class RuntimeExecutionController {
             Authentication authentication, @RequestBody Map<String, Object> variables) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.TASK_COMPLETE);
         RuntimeExecutionService.SubmissionResult result = service.submitTask(
-                clientId, taskId, variables, authentication.getName());
+                clientId, taskId, variables, actorId(authentication));
         return result.errors().isEmpty()
             ? ResponseEntity.ok(result.nextTasks())
             : ResponseEntity.unprocessableEntity().body(Map.of("errors", result.errors()));
@@ -105,7 +110,7 @@ public class RuntimeExecutionController {
             @PathVariable String instanceId, @RequestParam String clientId,
             Authentication authentication) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.TASK_VIEW);
-        return service.processHistory(clientId, instanceId, authentication.getName());
+        return service.processHistory(clientId, instanceId, actorId(authentication));
     }
 
     @GetMapping("/process-instances/{instanceId}/history")
@@ -113,7 +118,7 @@ public class RuntimeExecutionController {
             @PathVariable String instanceId, @RequestParam String clientId,
             Authentication authentication) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.TASK_VIEW);
-        return service.processHistory(clientId, instanceId, authentication.getName());
+        return service.processHistory(clientId, instanceId, actorId(authentication));
     }
 
     @GetMapping("/case-instances/{instanceId}/history")
@@ -121,7 +126,7 @@ public class RuntimeExecutionController {
             @PathVariable String instanceId, @RequestParam String clientId,
             Authentication authentication) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.TASK_VIEW);
-        return service.caseHistory(clientId, instanceId, authentication.getName());
+        return service.caseHistory(clientId, instanceId, actorId(authentication));
     }
 
     @GetMapping("/case-instances/{instanceId}")
@@ -129,7 +134,7 @@ public class RuntimeExecutionController {
             @PathVariable String instanceId, @RequestParam String clientId,
             Authentication authentication) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.TASK_VIEW);
-        return service.caseHistory(clientId, instanceId, authentication.getName());
+        return service.caseHistory(clientId, instanceId, actorId(authentication));
     }
 
     @GetMapping("/audit")
@@ -141,5 +146,10 @@ public class RuntimeExecutionController {
         return target == null || target.isBlank()
                 ? auditEventService.findForClient(clientId)
                 : auditEventService.findForTarget(clientId, target);
+    }
+
+    private String actorId(Authentication authentication) {
+        return authentication.getPrincipal() instanceof com.flowableplus.work.security.LocalUser user
+                ? user.username() : authentication.getName();
     }
 }

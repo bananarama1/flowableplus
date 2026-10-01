@@ -28,11 +28,26 @@ public class PublicationIntakeController {
     @PostMapping
     public ResponseEntity<?> publish(
             @RequestBody PublicationEnvelope envelope,
+            @RequestHeader(name = PublicationContract.API_VERSION_HEADER, required = false) String apiVersion,
+            @RequestHeader(name = PublicationContract.CORRELATION_ID_HEADER, required = false) String correlationId,
+            @RequestHeader(name = PublicationContract.IDEMPOTENCY_KEY_HEADER, required = false) String idempotencyKey,
             Authentication authentication) {
             String clientId = envelope == null || envelope.model() == null
+                || envelope.model().clientScope() == null
                 ? null : envelope.model().clientScope().clientId();
-            authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.MODEL_PUBLISH);
-        PublicationIntakeService.IntakeResult intake = service.accept(envelope, authentication.getName());
+        if (clientId == null) {
+            var errors = new java.util.ArrayList<>(PublicationContract.validate(envelope));
+            errors.addAll(PublicationContract.validateHeaders(envelope, apiVersion, correlationId, idempotencyKey));
+            return ResponseEntity.badRequest().body(errors);
+        }
+        authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.MODEL_PUBLISH);
+        var headerErrors = PublicationContract.validateHeaders(envelope, apiVersion, correlationId, idempotencyKey);
+        if (!headerErrors.isEmpty()) {
+            return ResponseEntity.badRequest().body(headerErrors);
+        }
+        String actorId = authentication.getPrincipal() instanceof com.flowableplus.work.security.LocalUser user
+            ? user.username() : authentication.getName();
+        PublicationIntakeService.IntakeResult intake = service.accept(envelope, actorId);
         if (!intake.errors().isEmpty()) {
             return ResponseEntity.badRequest().body(intake.errors());
         }

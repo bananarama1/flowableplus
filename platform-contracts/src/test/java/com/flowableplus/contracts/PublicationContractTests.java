@@ -30,6 +30,26 @@ class PublicationContractTests {
         assertThat(retry.correlationId()).isEqualTo(first.correlationId());
     }
 
+    @Test
+    void rejectsIncompleteNestedPublicationIdentity() {
+        PublicationEnvelope envelope = new PublicationEnvelope(
+                new ModelIdentity(null, "leave-request", ModelType.BPMN, "Leave request"),
+                new ModelVersion(null, 0, VersionState.VALIDATED, ""),
+                new DocumentPayload(ModelType.BPMN, "", ""),
+                null, "retry-1", "correlation-1", "user-1");
+
+        assertThat(PublicationContract.validate(envelope)).extracting(StructuredError::code)
+                .containsExactly("CLIENT_SCOPE_REQUIRED", "VERSION_INVALID", "DOCUMENT_INVALID", "MODEL_VERSION_MISMATCH");
+    }
+
+    @Test
+    void rejectsMismatchedTransportHeaders() {
+        assertThat(PublicationContract.validateHeaders(
+                publication("correlation-1", "retry-1"), "2", "correlation-2", "retry-2"))
+                .extracting(StructuredError::code)
+                .containsExactly("API_VERSION_UNSUPPORTED", "CORRELATION_ID_MISMATCH", "IDEMPOTENCY_KEY_MISMATCH");
+    }
+
     private PublicationEnvelope publication(String correlationId, String idempotencyKey) {
         ClientScope client = new ClientScope("client-a");
         ModelIdentity identity = new ModelIdentity(client, "leave-request", ModelType.BPMN, "Leave request");

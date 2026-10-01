@@ -32,4 +32,6 @@ test('work shell wires generic runtime interactions', async () => {
     assert.match(script, /\/api\/runtime\/case-instances\//);
     assert.match(script, /Initial variables must be valid JSON/);
     assert.match(script, /Task completed\. Refreshing next state/);
+    assert.doesNotMatch(script, /fallbackFormSchema/);
+    assert.match(script, /startableDefinitions/);
 });

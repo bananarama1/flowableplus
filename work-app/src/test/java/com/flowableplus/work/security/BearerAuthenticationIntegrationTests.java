@@ -73,4 +73,28 @@ class BearerAuthenticationIntegrationTests {
                         .content("{\"username\":\"alice\",\"password\":\"wrong\"}"))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void authenticatedUsersCannotPublishIntoAnotherClient() throws Exception {
+        MvcResult tokenResult = mockMvc.perform(post("/api/auth/token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"alice\",\"password\":\"local-password\"}"))
+                .andExpect(status().isOk())
+                .andReturn();
+        JsonNode token = objectMapper.readTree(tokenResult.getResponse().getContentAsString());
+
+        mockMvc.perform(post("/api/publications")
+                        .header("Authorization", "Bearer " + token.get("accessToken").asText())
+                        .header("X-FlowablePlus-Api-Version", "1")
+                        .header("X-Correlation-Id", "cross-client-correlation")
+                        .header("Idempotency-Key", "cross-client-retry")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"model":{"clientScope":{"clientId":"client-other"},"modelKey":"leave","modelType":"BPMN","displayName":"Leave"},
+                                 "version":{"model":{"clientScope":{"clientId":"client-other"},"modelKey":"leave","modelType":"BPMN","displayName":"Leave"},"version":1,"state":"VALIDATED","contentHash":"sha256:leave"},
+                                 "document":{"modelType":"BPMN","fileName":"leave.bpmn20.xml","xml":"<definitions><process id='leave'/></definitions>"},
+                                 "idempotencyKey":"cross-client-retry","correlationId":"cross-client-correlation","actorId":"alice"}
+                                """))
+                .andExpect(status().isForbidden());
+    }
 }

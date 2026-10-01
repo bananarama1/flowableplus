@@ -14,6 +14,7 @@ import com.flowableplus.modeler.publication.PublicationRecordService;
 import com.flowableplus.modeler.security.AuthorizationPermission;
 import com.flowableplus.modeler.security.AuthorizationService;
 import com.flowableplus.contracts.PublicationResult;
+import com.flowableplus.contracts.StructuredError;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -98,7 +99,14 @@ public class ModelerModelController {
             @RequestParam String clientId, @PathVariable String versionId, @RequestBody ValidationRequest request, Authentication authentication) {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.MODEL_VALIDATE);
         ModelVersionEntity version = versionService.findAuthorized(clientId, versionId);
-        return validator.validate(request.modelType(), version.getXml(), request.formSchema(), correlationId(request.correlationId()));
+        ModelProjectEntity project = projectService.findAuthorized(clientId, version.getProjectId());
+        ModelType modelType = request == null || request.modelType() == null
+            ? project.getModelType() : request.modelType();
+        if (modelType != project.getModelType()) {
+            return validationFailure("MODEL_TYPE_MISMATCH", "The selected version's model type cannot be changed");
+        }
+        return validator.validate(modelType, version.getXml(), request == null ? null : request.formSchema(),
+            correlationId(request == null ? null : request.correlationId()));
     }
 
     @PostMapping("/versions/{versionId}/publish")
@@ -108,22 +116,30 @@ public class ModelerModelController {
         authorizationService.requireAuthentication(authentication, clientId, AuthorizationPermission.MODEL_PUBLISH);
         ModelVersionEntity version = versionService.findAuthorized(clientId, versionId);
         ModelProjectEntity project = projectService.findAuthorized(clientId, version.getProjectId());
-        String correlationId = correlationId(request.correlationId());
+        ModelType modelType = request == null || request.modelType() == null
+                ? project.getModelType() : request.modelType();
+        if (modelType != project.getModelType()) {
+            return ResponseEntity.unprocessableEntity()
+                    .body(validationFailure("MODEL_TYPE_MISMATCH", "The selected version's model type cannot be changed"));
+        }
+        String correlationId = correlationId(request == null ? null : request.correlationId());
+        String actorId = authentication.getPrincipal() instanceof com.flowableplus.modeler.security.LocalUser user
+            ? user.username() : authentication.getName();
         ModelValidationResult validation = validator.validate(
-            request.modelType(), version.getXml(), request.formSchema(), correlationId);
+            modelType, version.getXml(), request == null ? null : request.formSchema(), correlationId);
         if (!validation.valid()) {
             return ResponseEntity.unprocessableEntity().body(validation);
         }
         PublicationResult publication = publicationClient.publish(
-            project, version, request.formSchema(), request.actorId(), correlationId, authorization);
+                project, version, request == null ? null : request.formSchema(), actorId, correlationId, authorization);
         if (publication.status() != com.flowableplus.contracts.PublicationStatus.ACTIVE) {
             PublicationRecordEntity failure = publicationRecordService.recordFailure(
-                clientId, project.getModelKey(), versionId, request.actorId(), publication.failureMessage(), correlationId);
+                    clientId, project.getModelKey(), versionId, actorId, publication.failureMessage(), correlationId);
             return ResponseEntity.unprocessableEntity().body(failure);
         }
         ModelVersionEntity published = versionService.publish(clientId, versionId);
         PublicationRecordEntity record = publicationRecordService.recordActive(
-            clientId, project.getModelKey(), versionId, request.actorId(), publication.runtimeReference(), correlationId);
+                clientId, project.getModelKey(), versionId, actorId, publication.runtimeReference(), correlationId);
         return ResponseEntity.ok(Map.of(
             "version", published,
             "publication", record,
@@ -133,6 +149,11 @@ public class ModelerModelController {
 
     private String correlationId(String requested) {
         return requested == null || requested.isBlank() ? UUID.randomUUID().toString() : requested;
+    }
+
+    private ModelValidationResult validationFailure(String code, String message) {
+        return new ModelValidationResult(false, null,
+                List.of(new StructuredError(code, message, null, List.of())));
     }
 
     public record ProjectRequest(String modelKey, ModelType modelType, String displayName, String ownerId) { }

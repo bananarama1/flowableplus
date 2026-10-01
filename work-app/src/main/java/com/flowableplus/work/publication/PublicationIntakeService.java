@@ -19,7 +19,9 @@ import com.flowableplus.flowable.runtime.ClientRuntimeRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.flowableplus.work.audit.AuditEventService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +35,8 @@ public class PublicationIntakeService {
     private final RuntimeCompatibilityValidator compatibilityValidator;
     private final AuditEventService auditEventService;
     private final PublicationMetrics metrics;
+    private final PublicationRecordRepository publicationRepository;
+    private final ObjectMapper objectMapper;
     private final Map<String, PublicationResult> publications = new ConcurrentHashMap<>();
     private final Map<String, PublicationResult> activePublications = new ConcurrentHashMap<>();
     private final Map<String, RuntimeDefinition> activeDefinitions = new ConcurrentHashMap<>();
@@ -44,7 +48,7 @@ public class PublicationIntakeService {
             RuntimeCompatibilityValidator compatibilityValidator,
             AuditEventService auditEventService) {
         this(runtimeRegistry, runtimeAdapter, compatibilityValidator, auditEventService,
-                new PublicationMetrics(new SimpleMeterRegistry()));
+            new PublicationMetrics(new SimpleMeterRegistry()), null);
     }
 
     @Autowired
@@ -53,14 +57,18 @@ public class PublicationIntakeService {
             FlowableRuntimeAdapter runtimeAdapter,
             RuntimeCompatibilityValidator compatibilityValidator,
             AuditEventService auditEventService,
-            PublicationMetrics metrics) {
+            PublicationMetrics metrics,
+            PublicationRecordRepository publicationRepository) {
         this.runtimeRegistry = runtimeRegistry;
         this.runtimeAdapter = runtimeAdapter;
         this.compatibilityValidator = compatibilityValidator;
         this.auditEventService = auditEventService;
         this.metrics = metrics;
+        this.publicationRepository = publicationRepository;
+        this.objectMapper = new ObjectMapper();
     }
 
+    @Transactional
     public synchronized IntakeResult accept(PublicationEnvelope envelope, String actorId) {
         metrics.request();
         log.info("event=publication_received correlationId={} actorId={}", correlationId(envelope), actorId);
@@ -80,7 +88,7 @@ public class PublicationIntakeService {
         String clientId = envelope.model().clientScope().clientId();
         String publicationKey = clientId + "|" + envelope.model().modelKey()
                 + "|" + envelope.version().version() + "|" + envelope.idempotencyKey();
-        PublicationResult existing = publications.get(publicationKey);
+        PublicationResult existing = findExisting(clientId, envelope, publicationKey);
         if (existing != null) {
             metrics.duplicate();
             auditEventService.record(actorId, clientId, envelope.model().modelKey(), "PUBLICATION", "DUPLICATE", envelope.correlationId());
@@ -96,7 +104,7 @@ public class PublicationIntakeService {
             PublicationResult rejected = new PublicationResult(
                     PublicationStatus.FAILED, envelope.correlationId(), null,
                     "VERSION_NOT_VALIDATED", "Only validated model versions can be published");
-            publications.put(publicationKey, rejected);
+                saveRecord(envelope, actorId, rejected);
             auditEventService.record(actorId, clientId, envelope.model().modelKey(), "PUBLICATION", "FAILED", envelope.correlationId());
             return IntakeResult.accepted(rejected, false);
         }
@@ -107,7 +115,7 @@ public class PublicationIntakeService {
             PublicationResult rejected = new PublicationResult(
                     PublicationStatus.FAILED, envelope.correlationId(), null,
                     compatibilityErrors.get(0).code(), compatibilityErrors.get(0).message());
-            publications.put(publicationKey, rejected);
+                saveRecord(envelope, actorId, rejected);
             auditEventService.record(actorId, clientId, envelope.model().modelKey(), "PUBLICATION", "FAILED", envelope.correlationId());
             return IntakeResult.accepted(rejected, false);
         }
@@ -119,19 +127,22 @@ public class PublicationIntakeService {
             };
             PublicationResult active = new PublicationResult(
                     PublicationStatus.ACTIVE, envelope.correlationId(), deployment.deploymentId(), null, null);
-                metrics.active();
-                log.info("event=flowable_deployment_active correlationId={} clientId={} modelKey={} version={} deploymentId={}",
+            metrics.active();
+            log.info("event=flowable_deployment_active correlationId={} clientId={} modelKey={} version={} deploymentId={}",
                     envelope.correlationId(), clientId, envelope.model().modelKey(), envelope.version().version(),
                     deployment.deploymentId());
-            publications.put(publicationKey, active);
-                activePublications.put(activeKey(envelope), active);
-                activeDefinitions.put(activeKey(envelope), new RuntimeDefinition(
-                    envelope.model().clientScope(), envelope.model().modelKey(), envelope.model().modelType(),
-                    envelope.version().version(), envelope.model().displayName(), true, deployment.deploymentId()));
-                if (envelope.formSchema() != null) {
-                    activeFormSchemas.put(activeKey(envelope), envelope.formSchema());
-                }
-                auditEventService.record(actorId, clientId, envelope.model().modelKey(), "PUBLICATION", "ACTIVE", envelope.correlationId());
+            deactivatePrevious(envelope);
+            saveRecord(envelope, actorId, active);
+            activePublications.put(activeKey(envelope), active);
+            activeDefinitions.put(activeKey(envelope), new RuntimeDefinition(
+                envelope.model().clientScope(), envelope.model().modelKey(), envelope.model().modelType(),
+                envelope.version().version(), envelope.model().displayName(), true, deployment.deploymentId()));
+            if (envelope.formSchema() != null) {
+                activeFormSchemas.put(activeKey(envelope), envelope.formSchema());
+            } else {
+                activeFormSchemas.remove(activeKey(envelope));
+            }
+            auditEventService.record(actorId, clientId, envelope.model().modelKey(), "PUBLICATION", "ACTIVE", envelope.correlationId());
             return IntakeResult.accepted(active, false);
         } catch (RuntimeException exception) {
             metrics.failed();
@@ -141,13 +152,19 @@ public class PublicationIntakeService {
             PublicationResult failed = new PublicationResult(
                     PublicationStatus.FAILED, envelope.correlationId(), null,
                     "RUNTIME_DEPLOYMENT_FAILED", "The runtime rejected the publication");
-            publications.put(publicationKey, failed);
+                saveRecord(envelope, actorId, failed);
             auditEventService.record(actorId, clientId, envelope.model().modelKey(), "PUBLICATION", "FAILED", envelope.correlationId());
             return IntakeResult.accepted(failed, false);
         }
     }
 
     public Map<String, PublicationResult> activePublications() {
+        if (publicationRepository != null) {
+            return publicationRepository.findAllByActiveTrue().stream()
+                    .collect(java.util.stream.Collectors.toUnmodifiableMap(
+                            record -> activeKey(record.getClientId(), record.getModelKey()),
+                            PublicationRecordEntity::result));
+        }
         return Map.copyOf(activePublications);
     }
 
@@ -155,9 +172,12 @@ public class PublicationIntakeService {
         if (isBlank(actorId)) {
             throw new PublicationAuthenticationException();
         }
-        return activeDefinitions.values().stream()
-                .filter(definition -> definition.clientScope().clientId().equals(clientId))
+        if (publicationRepository != null) {
+            return publicationRepository.findAllByClientIdAndActiveTrue(clientId).stream()
+                .map(PublicationRecordEntity::definition)
                 .toList();
+        }
+        return activeDefinitions.values().stream().filter(definition -> definition.clientScope().clientId().equals(clientId)).toList();
     }
 
     public RuntimeDefinition activeDefinition(String clientId, String modelKey, ModelType modelType, String actorId) {
@@ -172,7 +192,45 @@ public class PublicationIntakeService {
                 .filter(definition -> definition.modelKey().equals(modelKey))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeDefinitionNotFoundException(modelKey));
+        if (publicationRepository != null) {
+            return publicationRepository.findByClientIdAndModelKeyAndActiveTrue(clientId, modelKey)
+                    .map(record -> record.formSchema(objectMapper)).orElse(null);
+        }
         return activeFormSchemas.get(activeKey(clientId, modelKey));
+    }
+
+    private PublicationResult findExisting(String clientId, PublicationEnvelope envelope, String publicationKey) {
+        if (publicationRepository != null) {
+            return publicationRepository.findByClientIdAndModelKeyAndVersionAndIdempotencyKey(
+                    clientId, envelope.model().modelKey(), envelope.version().version(), envelope.idempotencyKey())
+                    .map(PublicationRecordEntity::result).orElse(null);
+        }
+        return publications.get(publicationKey);
+    }
+
+    private void deactivatePrevious(PublicationEnvelope envelope) {
+        if (publicationRepository != null) {
+            publicationRepository.findByClientIdAndModelKeyAndActiveTrue(
+                    envelope.model().clientScope().clientId(), envelope.model().modelKey())
+                    .ifPresent(PublicationRecordEntity::deactivate);
+        }
+        activePublications.remove(activeKey(envelope));
+        activeDefinitions.remove(activeKey(envelope));
+        activeFormSchemas.remove(activeKey(envelope));
+    }
+
+    private void saveRecord(PublicationEnvelope envelope, String actorId, PublicationResult result) {
+        String publicationKey = envelope.model().clientScope().clientId() + "|" + envelope.model().modelKey()
+                + "|" + envelope.version().version() + "|" + envelope.idempotencyKey();
+        if (publicationRepository != null) {
+            publicationRepository.save(PublicationRecordEntity.from(
+                    envelope.model().clientScope().clientId(), envelope.model().modelKey(),
+                    envelope.model().modelType(), envelope.version().version(), envelope.model().displayName(),
+                    envelope.idempotencyKey(), envelope.correlationId(), actorId, result,
+                    envelope.formSchema(), objectMapper));
+        } else {
+            publications.put(publicationKey, result);
+        }
     }
 
     private String activeKey(PublicationEnvelope envelope) {

@@ -111,6 +111,25 @@ class ModelerModelControllerTests {
                 .andExpect(jsonPath("$.message").value("Published model versions are immutable; create a draft first."));
     }
 
+            @Test
+            void selectedProjectTypeCannotBeChangedByValidationRequest() throws Exception {
+            ModelProjectEntity project = projectService.create(
+                "client-local", "type-authority", com.flowableplus.contracts.ModelType.BPMN,
+                "Type authority", "modeler");
+            ModelVersionEntity version = versionService.saveDraft(
+                "client-local", project.getId(),
+                "<definitions><process id=\"type-authority\"/></definitions>");
+
+            mockMvc.perform(post("/api/modeler/versions/{versionId}/validate", version.getId())
+                    .param("clientId", "client-local")
+                    .header("Authorization", bearerToken())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"modelType\":\"CMMN\",\"correlationId\":\"type-correlation\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.valid").value(false))
+                .andExpect(jsonPath("$.errors[0].code").value("MODEL_TYPE_MISMATCH"));
+            }
+
     private String bearerToken() {
         return "Bearer " + tokenService.issue("modeler", "local-password").accessToken();
     }

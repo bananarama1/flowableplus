@@ -5,7 +5,7 @@
 ### Requirement: Modeler SHALL validate models before publication
 For BPMN drafts, the modeler SHALL validate the selected version using the server-side capability and form-metadata rules before enabling publication. Validation SHALL include the client, version, model type, correlation identifier, and the current persisted source rather than an unrelated local sample.
 
-#### Scenario: Validate a publishable BPMN draft
+#### Scenario: Validate the selected draft
 - **WHEN** an authorized modeler validates a selected BPMN draft with a required process identifier and supported metadata
 - **THEN** validation succeeds, returns normalized metadata, and makes that version eligible for publication
 
@@ -17,6 +17,10 @@ For BPMN drafts, the modeler SHALL validate the selected version using the serve
 - **WHEN** a BPMN draft contains malformed XML, a missing process identifier, an unsupported gateway/event, or invalid form metadata
 - **THEN** validation returns structured errors and the modeler keeps publication disabled
 
+#### Scenario: Display validation failures in the workspace
+- **WHEN** a draft model contains malformed content or unsupported runtime metadata
+- **THEN** validation fails with actionable errors associated with the affected model element or document rule
+
 #### Scenario: Report validation failures
 - **WHEN** a draft model contains malformed content or unsupported runtime metadata
 - **THEN** validation fails with actionable errors associated with the affected model element or document rule
@@ -24,7 +28,7 @@ For BPMN drafts, the modeler SHALL validate the selected version using the serve
 ### Requirement: Modeler SHALL publish an immutable model version
 The modeler SHALL publish the selected validated BPMN version through the authenticated runtime publication contract, display the returned active or failed state and correlation identifier, and leave the local version unpublished when transport or activation fails.
 
-#### Scenario: Publish a BPMN draft into the client runtime
+#### Scenario: Publish a validated selected version
 - **WHEN** an authorized modeler publishes a validated BPMN draft
 - **THEN** the modeler sends the immutable envelope with authorization, client identity, correlation identifier, and actor context, and records the active publication result
 
@@ -35,6 +39,10 @@ The modeler SHALL publish the selected validated BPMN version through the authen
 #### Scenario: Keep the active version on publication failure
 - **WHEN** publication times out, is unauthorized, or the work runtime rejects the BPMN definition
 - **THEN** the modeler displays a safe failure, does not mark the local version published, and the prior active runtime version remains available
+
+#### Scenario: Block publication without valid context
+- **WHEN** an authorized modeler attempts to publish a model that has failed validation
+- **THEN** the system rejects publication and creates no active runtime publication
 
 #### Scenario: Reject publication of an invalid model
 - **WHEN** an authorized modeler attempts to publish a model that has failed validation

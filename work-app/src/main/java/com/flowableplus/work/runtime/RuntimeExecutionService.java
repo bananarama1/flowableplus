@@ -43,11 +43,21 @@ public class RuntimeExecutionService {
 
     public ProcessExecution startProcess(String clientId, String modelKey, Map<String, Object> variables, String actorId) {
         var definition = publicationService.activeDefinition(clientId, modelKey, ModelType.BPMN, actorId);
-        ProcessExecution execution = runtimeAdapter.startProcess(definition.modelKey(), variables);
+        List<ErrorDetail> errors = validateStart(clientId, modelKey, variables, actorId);
+        if (!errors.isEmpty()) {
+            throw new RuntimeStartValidationException(errors);
+        }
+        ProcessExecution execution = runtimeAdapter.startProcess(definition.modelKey(), variables == null ? Map.of() : variables);
         processClients.put(execution.processInstanceId(), clientId);
         processModels.put(execution.processInstanceId(), definition.modelKey());
         auditEventService.record(actorId, clientId, execution.processInstanceId(), "PROCESS_START", "SUCCESS", UUID.randomUUID().toString());
         return execution;
+    }
+
+    public List<ErrorDetail> validateStart(String clientId, String modelKey, Map<String, Object> variables, String actorId) {
+        publicationService.activeDefinition(clientId, modelKey, ModelType.BPMN, actorId);
+        FormSchema schema = publicationService.activeFormSchema(clientId, modelKey, actorId);
+        return validate(schema, variables == null ? Map.of() : variables);
     }
 
     public CaseExecution startCase(String clientId, String modelKey, Map<String, Object> variables, String actorId) {
@@ -109,7 +119,7 @@ public class RuntimeExecutionService {
         }
         List<ErrorDetail> errors = new java.util.ArrayList<>();
         for (FormField field : schema.fields()) {
-            Object value = variables.get(field.variableName());
+            Object value = variables == null ? null : variables.get(field.variableName());
             if (field.required() && (value == null || value.toString().isBlank())) {
                 errors.add(new ErrorDetail(field.id(), "REQUIRED", "A value is required"));
                 continue;
