@@ -7,10 +7,12 @@ import org.flowable.cmmn.api.repository.CaseDefinition;
 import org.flowable.cmmn.api.repository.CmmnDeployment;
 import org.flowable.engine.ProcessEngine;
 import org.flowable.engine.RuntimeService;
+import org.flowable.engine.TaskService;
 import org.flowable.cmmn.api.runtime.CaseInstance;
 import org.flowable.cmmn.engine.CmmnEngine;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.runtime.ProcessInstance;
+import org.flowable.task.api.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -35,6 +37,11 @@ class ParentApplicationTests {
 
 	@Autowired 
 	private CmmnEngine cmmnEngine;
+
+	@Autowired 
+	private TaskService taskService;
+
+	
 
 	@Test
 	void contextLoads() {
@@ -80,6 +87,11 @@ class ParentApplicationTests {
 			.isEqualTo(deployment3.getParentDeploymentId());
 
 
+		Task approvalTask  = taskService.createTaskQuery()
+				.processInstanceId(appSimpleApprovalProcess.getId())
+				.singleResult();
+
+		Assertions.assertThat(approvalTask).isNotNull();
 	}
 
 }
