@@ -22,9 +22,26 @@ The Compose stack also starts PostgreSQL and Mailpit for local infrastructure:
 - Mailpit UI: <http://localhost:8025>
 - SMTP: `localhost:1025`
 
-The application currently uses its existing in-memory H2 configuration. The
-PostgreSQL and Mailpit services are provisioned and ready for features that
-need them.
+The application uses its in-memory H2 configuration for local development. The
+PostgreSQL and Mailpit services are provisioned and ready for manual testing.
+
+## Run tests
+
+Fast unit and slice tests run with:
+
+```text
+./mvnw test
+```
+
+Integration tests use PostgreSQL and Mailpit Testcontainers. They start their
+own disposable infrastructure and run consistently both locally and in CI:
+
+```text
+./mvnw verify
+```
+
+Docker must be running for integration tests. Integration tests use the `*IT`
+filename convention and are executed by Maven Failsafe during `verify`.
 
 ## Debug the application
 
