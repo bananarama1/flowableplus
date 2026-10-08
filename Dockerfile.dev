@@ -1,0 +1,13 @@
+FROM eclipse-temurin:17-jdk-jammy
+
+WORKDIR /workspace
+
+COPY . .
+
+RUN chmod +x mvnw .docker/dev-entrypoint.sh
+
+ENV MAVEN_CONFIG=/root/.m2
+
+EXPOSE 8080 5005
+
+ENTRYPOINT ["/workspace/.docker/dev-entrypoint.sh"]
