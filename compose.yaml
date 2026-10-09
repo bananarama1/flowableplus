@@ -19,18 +19,36 @@ services:
     develop:
       watch:
         - action: sync+restart
-          path: ./flowableplus-work/src/main/java
-          target: /workspace/flowableplus-work/src/main/java
+          path: ./flowableplus-example-app/src/main/java
+          target: /workspace/flowableplus-example-app/src/main/java
         - action: sync+restart
-          path: ./flowableplus-work/src/main/resources
-          target: /workspace/flowableplus-work/src/main/resources
+          path: ./flowableplus-example-app/src/main/resources
+          target: /workspace/flowableplus-example-app/src/main/resources
         - action: sync+restart
           path: ./flowableplus-example-models/src/main/resources
           target: /workspace/flowableplus-example-models/src/main/resources
+        - action: sync+restart
+          path: ./flowableplus-work-core/src/main/java
+          target: /workspace/flowableplus-work-core/src/main/java
+        - action: sync+restart
+          path: ./flowableplus-work-autoconfigure/src/main/java
+          target: /workspace/flowableplus-work-autoconfigure/src/main/java
+        - action: sync+restart
+          path: ./flowableplus-work-autoconfigure/src/main/resources
+          target: /workspace/flowableplus-work-autoconfigure/src/main/resources
+        - action: sync+restart
+          path: ./flowableplus-work-test-models/src/main/resources
+          target: /workspace/flowableplus-work-test-models/src/main/resources
         - action: rebuild
           path: ./pom.xml
         - action: rebuild
-          path: ./flowableplus-work/pom.xml
+          path: ./flowableplus-example-app/pom.xml
+        - action: rebuild
+          path: ./flowableplus-work-starter/pom.xml
+        - action: rebuild
+          path: ./flowableplus-work-autoconfigure/pom.xml
+        - action: rebuild
+          path: ./flowableplus-work-core/pom.xml
         - action: rebuild
           path: ./flowableplus-example-models/pom.xml
 

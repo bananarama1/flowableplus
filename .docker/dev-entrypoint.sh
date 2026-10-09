@@ -7,8 +7,8 @@ else
   debug_options=""
 fi
 
-./mvnw --batch-mode -pl flowableplus-work -am install -DskipTests
+./mvnw --batch-mode -pl flowableplus-example-app -am install -DskipTests
 
-exec ./mvnw --batch-mode -f flowableplus-work/pom.xml spring-boot:run \
+exec ./mvnw --batch-mode -f flowableplus-example-app/pom.xml spring-boot:run \
   -Dspring-boot.run.profiles="${SPRING_PROFILES_ACTIVE:-docker}" \
   -Dspring-boot.run.jvmArguments="${debug_options}"

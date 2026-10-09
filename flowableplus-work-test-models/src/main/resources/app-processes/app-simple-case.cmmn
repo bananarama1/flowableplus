@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/CMMN/20151109/MODEL" xmlns:cmmndi="http://www.omg.org/spec/CMMN/20151109/CMMNDI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" targetNamespace="http://flowableplus.com/example/app">
+    <case id="appSimpleCase" name="App Simple Case">
+        <casePlanModel id="casePlanModel" name="App Simple Case Plan Model" autoComplete="false">
+            <planItem id="taskPlanItem" definitionRef="simpleTask" />
+            <humanTask id="simpleTask" name="Simple Task" />
+        </casePlanModel>
+    </case>
+</definitions>

@@ -21,15 +21,16 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+import com.flowableplus.work.testsupport.FlowablePlusTestContainers;
+
+@SpringBootTest(classes = com.flowableplus.work.integration.FlowablePlusIntegrationTestApplication.class)
 @ActiveProfiles("test")
 class ParentApplicationIT {
 
 	@ServiceConnection
-	static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
+	static final PostgreSQLContainer<?> postgres = FlowablePlusTestContainers.postgres();
 
-	static final GenericContainer<?> mailpit = new GenericContainer<>("axllent/mailpit:v1.21.8")
-			.withExposedPorts(1025, 8025);
+	static final GenericContainer<?> mailpit = FlowablePlusTestContainers.mailpit();
 
 	static {
 		postgres.start();

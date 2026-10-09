@@ -15,8 +15,14 @@
 	<name>parent</name>
 	<description/>
 	<modules>
+		<module>flowableplus-work-core</module>
+		<module>flowableplus-work-autoconfigure</module>
+		<module>flowableplus-work-starter</module>
+		<module>flowableplus-work-test-models</module>
+		<module>flowableplus-work-test-support</module>
+		<module>flowableplus-work-integration-tests</module>
 		<module>flowableplus-example-models</module>
-		<module>flowableplus-work</module>
+		<module>flowableplus-example-app</module>
 	</modules>
 	<url/>
 	<licenses>

@@ -12,7 +12,7 @@ docker compose up --build --watch
 ```
 
 The application is available at <http://localhost:8080>. Changes under the
-application and example-model source directories are synchronized into the
+example application and model source directories are synchronized into the
 development container and trigger a restart. Maven artifacts are stored in a
 named volume so subsequent starts do not download them again.
 
@@ -34,7 +34,7 @@ Fast unit and slice tests run with:
 ```
 
 Integration tests use PostgreSQL and Mailpit Testcontainers. They start their
-own disposable infrastructure and run consistently both locally and in CI:
+own disposable infrastructure and run consistently both locally and in CI
 
 ```text
 ./mvnw verify
