@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://flowableplus.com/example/app">
+    <process id="appSimpleApprovalProcess" name="App Simple Approval Process" isExecutable="true">
+        <startEvent id="start" />
+        <userTask id="approve" name="Approve" />
+        <endEvent id="end" />
+        <sequenceFlow id="toApprove" sourceRef="start" targetRef="approve" />
+        <sequenceFlow id="toEnd" sourceRef="approve" targetRef="end" />
+    </process>
+</definitions>

@@ -25,6 +25,10 @@ The Compose stack also starts PostgreSQL and Mailpit for local infrastructure:
 The application uses its in-memory H2 configuration for local development. The
 PostgreSQL and Mailpit services are provisioned and ready for manual testing.
 
+The same workflow is available through `scripts/dev-up.ps1` on PowerShell or
+`scripts/dev-up.sh` on Bash. Compose watch mode runs in the foreground; do not
+combine it with `-d`.
+
 ## Run tests
 
 Fast unit and slice tests run with:
@@ -42,6 +46,30 @@ own disposable infrastructure and run consistently both locally and in CI
 
 Docker must be running for integration tests. Integration tests use the `*IT`
 filename convention and are executed by Maven Failsafe during `verify`.
+
+The cross-platform test wrappers are `scripts/test.ps1` and `scripts/test.sh`.
+
+## Debug tests
+
+Tests run in forked JVMs, separately from the application JVM. Use the scripts
+below to suspend the test JVM until a debugger attaches on `localhost:5005`:
+
+```powershell
+.\scripts\debug-unit-tests.ps1
+.\scripts\debug-integration-tests.ps1
+```
+
+Bash:
+
+```bash
+./scripts/debug-unit-tests.sh
+./scripts/debug-integration-tests.sh
+```
+
+Attach the debugger after the command pauses. The unit-test script runs the
+example application's Surefire tests. The integration-test script runs the
+Flowable platform tests through Failsafe and requires Docker for Testcontainers.
+Do not run the application debug script on the same port at the same time.
 
 ## Debug the application
 
@@ -69,6 +97,8 @@ starting Compose.
 ```text
 docker compose down
 ```
+
+The equivalent wrappers are `scripts/stop.ps1` and `scripts/stop.sh`.
 
 Named volumes are retained. To also remove local PostgreSQL data and the Maven
 cache, use `docker compose down --volumes`.
