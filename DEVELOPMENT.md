@@ -11,9 +11,10 @@ From the repository root:
 docker compose up --build --watch
 ```
 
-The application is available at <http://localhost:8080>. Changes under the
-example application and model source directories are synchronized into the
-development container and trigger a restart. Maven artifacts are stored in a
+The application is available at <http://localhost:8080>. The Work UI is
+available at <http://localhost:3000>. Changes under the example application,
+model, and UI source directories are synchronized into the development
+containers and trigger a restart or rebuild. Maven artifacts are stored in a
 named volume so subsequent starts do not download them again.
 
 The Compose stack also starts PostgreSQL and Mailpit for local infrastructure:
@@ -24,6 +25,10 @@ The Compose stack also starts PostgreSQL and Mailpit for local infrastructure:
 
 The application uses its in-memory H2 configuration for local development. The
 PostgreSQL and Mailpit services are provisioned and ready for manual testing.
+
+The UI is a Vite React application in `flowableplus-work-ui`. Its `/api` proxy
+routes to the Spring application service, so the browser can use the UI without
+requiring local CORS configuration.
 
 The same workflow is available through `scripts/dev-up.ps1` on PowerShell or
 `scripts/dev-up.sh` on Bash. Compose watch mode runs in the foreground; do not

@@ -52,6 +52,32 @@ services:
         - action: rebuild
           path: ./flowableplus-example-models/pom.xml
 
+  ui:
+    build:
+      context: ./flowableplus-work-ui
+      dockerfile: Dockerfile.dev
+    environment:
+      VITE_API_PROXY_TARGET: http://app:8080
+    ports:
+      - "3000:3000"
+    depends_on:
+      app:
+        condition: service_started
+    develop:
+      watch:
+        - action: sync
+          path: ./flowableplus-work-ui/src
+          target: /workspace/src
+        - action: sync
+          path: ./flowableplus-work-ui/index.html
+          target: /workspace/index.html
+        - action: rebuild
+          path: ./flowableplus-work-ui/package.json
+        - action: rebuild
+          path: ./flowableplus-work-ui/package-lock.json
+        - action: rebuild
+          path: ./flowableplus-work-ui/Dockerfile.dev
+
   postgres:
     image: postgres:16-alpine
     environment:
