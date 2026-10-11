@@ -18,7 +18,3 @@ Use PostgreSQL as the canonical supported database from the beginning. Use Flowa
 - Process models are versioned with the application source.
 - Runtime model editing and database-managed model deployment are deferred.
 - Application-owned business tables are deferred until a concrete requirement exists.
-
-## Implementation note
-
-The integration-test profile already uses PostgreSQL. The Docker application profile still points to H2 and must be switched to the Compose PostgreSQL service before this decision is fully implemented.

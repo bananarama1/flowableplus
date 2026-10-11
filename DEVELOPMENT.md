@@ -23,9 +23,7 @@ The Compose stack also starts PostgreSQL and Mailpit for local infrastructure:
 - Mailpit UI: <http://localhost:8025>
 - SMTP: `localhost:1025`
 
-The intended application runtime uses the PostgreSQL service. The integration
-test profile already uses PostgreSQL; the Docker application profile currently
-still points to H2 and is a known follow-up implementation task.
+The application runtime and integration test profile use the PostgreSQL service.
 
 The UI is a Vite React application in `flowableplus-work-ui`. Its `/api` proxy
 routes to the Spring application service, so the browser can use the UI without
