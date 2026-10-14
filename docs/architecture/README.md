@@ -7,7 +7,8 @@ This directory is the durable architecture reference for Flowable Plus.
 1. Read the accepted ADRs for the reasons behind the system boundaries.
 2. Read [api-strategy.md](api-strategy.md) for REST and authentication behavior.
 3. Read [testing-strategy.md](testing-strategy.md) for executable quality boundaries.
-4. Read [DEVELOPMENT.md](../../DEVELOPMENT.md) for local commands and environment details.
+4. Read [feature specifications](../specs/README.md) for observable behavior and requirement traceability.
+5. Read [DEVELOPMENT.md](../../DEVELOPMENT.md) for local commands and environment details.
 
 ## Accepted decisions
 

@@ -2,6 +2,12 @@
 
 Flowable Plus uses three complementary test layers.
 
+Feature behavior is specified in [docs/specs](../specs/README.md). The first
+target is the [approval workflow](../specs/approval-workflow.md). Requirement
+IDs in those specifications are reflected in test names so the Markdown
+requirements and executable checks remain connected without a separate test
+management tool.
+
 ## Unit and slice tests
 
 Use Maven Surefire for fast tests of focused Java behavior. These tests should not require Docker.

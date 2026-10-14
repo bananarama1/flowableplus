@@ -53,6 +53,18 @@ filename convention and are executed by Maven Failsafe during `verify`.
 
 The cross-platform test wrappers are `scripts/test.ps1` and `scripts/test.sh`.
 
+## Spec-driven changes
+
+Observable behavior is specified in [docs/specs](docs/specs/README.md). Start
+each feature increment by adding or refining a requirement and its
+Given/When/Then scenarios. Add the focused Java integration or Playwright test
+before implementing the behavior, then run the narrow check before the broader
+Maven or browser suite. Keep requirement IDs in test names for traceability.
+
+The first target is the [approval workflow](docs/specs/approval-workflow.md).
+Architecture decisions remain in `docs/architecture/decisions`; feature specs
+must follow those decisions and should not silently change them.
+
 ## Debug tests
 
 Tests run in forked JVMs, separately from the application JVM. Use the scripts
