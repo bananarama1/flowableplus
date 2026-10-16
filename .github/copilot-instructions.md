@@ -11,5 +11,6 @@
 - Keep black-box starter and REST integration tests in `flowableplus-work-integration-tests`.
 - Use `flowableplus-work-test-models` for stable test fixtures and `flowableplus-example-models` for runnable example fixtures.
 - Use Playwright for browser end-to-end coverage of the complete approval workflow.
+- For every `REQ-*` in `docs/specs`, define both a backend integration test and a Playwright UI test with the same requirement ID; deferred behavior must fail explicitly as `REQ-* not implemented`, never be skipped or disabled.
 - Show authentication, authorization, validation, and task-conflict failures in a top-level UI text banner.
 - Do not duplicate native Flowable endpoints without a documented reason.

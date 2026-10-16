@@ -7,6 +7,9 @@ target is the [approval workflow](../specs/approval-workflow.md). Requirement
 IDs in those specifications are reflected in test names so the Markdown
 requirements and executable checks remain connected without a separate test
 management tool.
+Every requirement has two required test definitions: a backend integration test
+and a Playwright UI test. The layers report independently whether the backend
+contract and the complete browser workflow are implemented.
 
 ## Unit and slice tests
 
@@ -43,6 +46,14 @@ login
 ```
 
 Playwright validates the browser, React UI, session authentication, REST API, backend, database, and deployed process together. It complements rather than replaces Java integration tests.
+
+### Requirement test status
+
+Do not mark deferred requirement tests as skipped. Keep both test definitions
+active and fail them with an explicit `REQ-* not implemented` message until the
+behavior exists. This makes incomplete backend and UI coverage visible in CI
+and distinguishes a backend-only implementation from a complete user-facing
+implementation.
 
 ## Upgrade rule
 

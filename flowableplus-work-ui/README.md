@@ -18,6 +18,8 @@ login -> process definitions -> start approval -> task -> claim -> complete -> v
 
 Authentication failures, authorization failures, expired sessions, validation errors, and task conflicts are displayed in a top-level text banner.
 
+Every requirement in `docs/specs` has a corresponding Playwright test named with its `REQ-*` identifier. Tests for deferred UI behavior stay active and fail explicitly with `REQ-* not implemented` until the UI is available.
+
 ## Local development
 
 From the repository root:
