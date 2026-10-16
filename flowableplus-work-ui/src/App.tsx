@@ -1,9 +1,20 @@
-import { useCallback, useEffect, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useState } from 'react'
 
 type FlowableStatus = {
   runtimeServiceAvailable: boolean
   status: string
   message: string
+}
+
+type ProcessDefinition = {
+  id: string
+  key: string
+  name?: string
+  version: number
+}
+
+type ProcessDefinitionsResponse = {
+  data: ProcessDefinition[]
 }
 
 const emptyStatus: FlowableStatus = {
@@ -14,22 +25,38 @@ const emptyStatus: FlowableStatus = {
 
 function App() {
   const [status, setStatus] = useState<FlowableStatus>(emptyStatus)
+  const [processDefinitions, setProcessDefinitions] = useState<ProcessDefinition[]>([])
+  const [authenticated, setAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [loggingIn, setLoggingIn] = useState(false)
   const [lastChecked, setLastChecked] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const loadStatus = useCallback(async () => {
+  const loadWorkspace = useCallback(async () => {
     setLoading(true)
     setError(null)
 
     try {
-      const response = await fetch('/api/flowable/status')
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`)
+      const [statusResponse, definitionsResponse] = await Promise.all([
+        fetch('/api/flowable/status', { credentials: 'include' }),
+        fetch('/api/flowableplus-api/repository/process-definitions', { credentials: 'include' }),
+      ])
+
+      if (statusResponse.redirected || definitionsResponse.redirected || statusResponse.status === 401 || definitionsResponse.status === 401) {
+        setAuthenticated(false)
+        throw new Error('Your session is not authenticated. Sign in to view process definitions.')
       }
 
-      const nextStatus = (await response.json()) as FlowableStatus
+      if (!statusResponse.ok || !definitionsResponse.ok) {
+        setAuthenticated(false)
+        throw new Error('Your session is not authenticated. Sign in to view process definitions.')
+      }
+
+      const nextStatus = (await statusResponse.json()) as FlowableStatus
+      const nextDefinitions = (await definitionsResponse.json()) as ProcessDefinitionsResponse
       setStatus(nextStatus)
+      setProcessDefinitions(nextDefinitions.data)
+      setAuthenticated(true)
       setLastChecked(new Date())
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'Unable to reach the API.')
@@ -39,8 +66,51 @@ function App() {
   }, [])
 
   useEffect(() => {
-    void loadStatus()
-  }, [loadStatus])
+    void loadWorkspace()
+  }, [loadWorkspace])
+
+  const login = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const form = event.currentTarget
+    setLoggingIn(true)
+    setError(null)
+
+    const formData = new FormData(event.currentTarget)
+    try {
+      const loginPageResponse = await fetch('/api/login', { credentials: 'include' })
+      const loginPage = await loginPageResponse.text()
+      const loginDocument = new DOMParser().parseFromString(loginPage, 'text/html')
+      const csrfToken = loginDocument.querySelector('input[name="_csrf"]')?.getAttribute('value')
+      if (!csrfToken) {
+        throw new Error('Unable to prepare the login session.')
+      }
+
+      const credentials = new URLSearchParams({
+        username: String(formData.get('username') ?? ''),
+        password: String(formData.get('password') ?? ''),
+        _csrf: csrfToken,
+      })
+      const loginResponse = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: credentials,
+        credentials: 'include',
+        redirect: 'manual',
+      })
+      const loginSucceeded = loginResponse.type === 'opaqueredirect' || (loginResponse.status >= 200 && loginResponse.status < 400)
+      if (!loginSucceeded) {
+        throw new Error('Authentication failed. Check your username and password.')
+      }
+
+      await loadWorkspace()
+      form.reset()
+    } catch (loginError) {
+      setAuthenticated(false)
+      setError(loginError instanceof Error ? loginError.message : 'Authentication failed.')
+    } finally {
+      setLoggingIn(false)
+    }
+  }
 
   const isAvailable = status.runtimeServiceAvailable && !error
 
@@ -94,6 +164,31 @@ function App() {
           </div>
         </header>
 
+        {error && (
+          <div className="error-banner" role="alert">
+            {error}
+          </div>
+        )}
+
+        {!authenticated ? (
+          <section className="login-panel" aria-labelledby="login-heading">
+            <div>
+              <p className="eyebrow">Session required</p>
+              <h2 id="login-heading">Sign in to your work platform</h2>
+              <p className="panel-copy">Use the development account to access deployed process definitions.</p>
+            </div>
+            <form className="login-form" onSubmit={login}>
+              <label htmlFor="username">Username</label>
+              <input id="username" name="username" type="text" autoComplete="username" required />
+              <label htmlFor="password">Password</label>
+              <input id="password" name="password" type="password" autoComplete="current-password" required />
+              <button className="refresh-button login-button" type="submit" disabled={loggingIn}>
+                {loggingIn ? 'Signing in...' : 'Sign in'}
+              </button>
+            </form>
+          </section>
+        ) : (
+        <>
         <div className="content-grid">
           <section className="hero-panel">
             <div>
@@ -133,12 +228,35 @@ function App() {
               </div>
             </div>
 
-            <button className="refresh-button" type="button" onClick={() => void loadStatus()} disabled={loading}>
+            <button className="refresh-button" type="button" onClick={() => void loadWorkspace()} disabled={loading}>
               <span className={loading ? 'refresh-icon spinning' : 'refresh-icon'}>↻</span>
               {loading ? 'Checking runtime...' : 'Refresh status'}
             </button>
           </section>
         </div>
+
+        <section className="process-section" id="processes" aria-labelledby="process-heading">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Native Flowable REST</p>
+              <h2 id="process-heading">Process definitions</h2>
+            </div>
+            <span className="count-badge">{processDefinitions.length} available</span>
+          </div>
+          <div className="process-list">
+            {processDefinitions.map((definition) => (
+              <article className="process-row" key={definition.id}>
+                <div>
+                  <strong>{definition.name ?? definition.key}</strong>
+                  <span>{definition.key} / version {definition.version}</span>
+                </div>
+                <span className="process-status">Deployed</span>
+              </article>
+            ))}
+          </div>
+        </section>
+        </>
+        )}
 
         <section className="metrics" aria-label="Platform metrics">
           <article className="metric-card">

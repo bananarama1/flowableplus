@@ -244,6 +244,127 @@ h2 {
   gap: 18px;
 }
 
+.error-banner {
+  margin-bottom: 18px;
+  padding: 13px 16px;
+  border: 1px solid #e7a69b;
+  color: #8d3d34;
+  background: #fff1ee;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.login-panel,
+.process-section {
+  border: 1px solid rgba(195, 214, 209, 0.8);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 14px 34px rgba(33, 67, 75, 0.07);
+}
+
+.login-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+  gap: 42px;
+  padding: 34px 38px;
+}
+
+.panel-copy {
+  max-width: 450px;
+  margin: 12px 0 0;
+  color: #6f898e;
+  line-height: 1.6;
+}
+
+.login-form {
+  display: grid;
+  gap: 8px;
+}
+
+.login-form label {
+  color: #48676d;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.login-form input {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 11px 12px;
+  border: 1px solid #c8dcd6;
+  color: #183b56;
+  background: #fbfdfc;
+}
+
+.login-button {
+  margin-top: 8px;
+}
+
+.process-section {
+  margin-top: 18px;
+  padding: 28px 32px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.count-badge,
+.process-status {
+  color: #276349;
+  background: #e5f4ec;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.count-badge {
+  padding: 8px 10px;
+}
+
+.process-list {
+  display: grid;
+  gap: 8px;
+}
+
+.process-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #dce9e5;
+  background: #fbfdfc;
+}
+
+.process-row strong,
+.process-row span {
+  display: block;
+}
+
+.process-row strong {
+  color: #183b56;
+  font-size: 14px;
+}
+
+.process-row div span {
+  margin-top: 5px;
+  color: #7a9295;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+}
+
+.process-status {
+  padding: 6px 8px;
+}
+
 .hero-panel,
 .status-card,
 .metric-card {
@@ -526,6 +647,16 @@ h2 {
   .content-grid,
   .metrics {
     grid-template-columns: 1fr;
+  }
+
+  .login-panel {
+    grid-template-columns: 1fr;
+    gap: 26px;
+    padding: 27px;
+  }
+
+  .process-section {
+    padding: 24px 22px;
   }
 
   .hero-panel {
