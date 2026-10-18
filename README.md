@@ -18,6 +18,10 @@ log in
 
 The initial application uses one in-memory username/password user, PostgreSQL, classpath-deployed process models, and Flowable's own persistence schema.
 
+## Cloud handoff smoke test
+
+This marker change verifies the cloud handoff pull-request workflow.
+
 ## Architecture
 
 ```text
