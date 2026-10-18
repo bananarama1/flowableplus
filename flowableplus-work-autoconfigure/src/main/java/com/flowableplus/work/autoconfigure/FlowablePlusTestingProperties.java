@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class FlowablePlusTestingProperties {
 
 	private boolean enabled;
+	private boolean skipDefaultDeployment;
 
 	public boolean isEnabled() {
 		return enabled;
@@ -13,5 +14,13 @@ public class FlowablePlusTestingProperties {
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+
+	public boolean isSkipDefaultDeployment() {
+		return skipDefaultDeployment;
+	}
+
+	public void setSkipDefaultDeployment(boolean skipDefaultDeployment) {
+		this.skipDefaultDeployment = skipDefaultDeployment;
 	}
 }

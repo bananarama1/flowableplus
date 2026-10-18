@@ -37,6 +37,7 @@ public class FlowablePlusAutoConfiguration {
 		http.authorizeHttpRequests(requests -> requests
 				.requestMatchers("/login", "/css/**", "/js/**").permitAll()
 				.anyRequest().authenticated())
+			.csrf(csrf -> csrf.ignoringRequestMatchers("/plus/test/app-deployments/**"))
 			.authenticationProvider(authenticationProvider)
 			.httpBasic(httpBasic -> {})
 			.formLogin(form -> form.permitAll())
@@ -84,8 +85,12 @@ public class FlowablePlusAutoConfiguration {
 	}
 
 	@Bean
-	CommandLineRunner flowablePlusProcessDeployment(RepositoryService repositoryService) {
+	CommandLineRunner flowablePlusProcessDeployment(RepositoryService repositoryService,
+			FlowablePlusTestingProperties testingProperties) {
 		return args -> {
+			if (testingProperties.isSkipDefaultDeployment()) {
+				return;
+			}
 			if (repositoryService.createProcessDefinitionQuery()
 					.processDefinitionKey("simpleApprovalProcess")
 					.latestVersion()

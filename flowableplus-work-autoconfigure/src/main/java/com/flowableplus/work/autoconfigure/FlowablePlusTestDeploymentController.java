@@ -27,7 +27,7 @@ public class FlowablePlusTestDeploymentController {
 		this.appRepositoryService = appRepositoryService;
 	}
 
-	@PostMapping("/flowableplus-api/plus/test/app-deployments")
+	@PostMapping("/plus/test/app-deployments")
 	public ResponseEntity<DeploymentResponse> deploy(@RequestBody DeploymentRequest request) throws Exception {
 		String directory = normalizeDirectory(request.resourcePath());
 		Resource[] resources = new PathMatchingResourcePatternResolver(getClass().getClassLoader())
@@ -56,7 +56,7 @@ public class FlowablePlusTestDeploymentController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(new DeploymentResponse(deployment.getId()));
 	}
 
-	@DeleteMapping("/flowableplus-api/plus/test/app-deployments/{deploymentId}")
+	@DeleteMapping("/plus/test/app-deployments/{deploymentId}")
 	public ResponseEntity<Void> delete(@PathVariable String deploymentId) {
 		if (!createdDeploymentIds.remove(deploymentId)) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Deployment was not created by this endpoint");

@@ -102,7 +102,7 @@ class ApprovalWorkflowIT {
 	@Test
 	void deploysAndDeletesAnIsolatedTestApp() {
 		RestClient client = RestClient.builder()
-				.baseUrl("http://localhost:" + port + "/flowableplus-api/plus/test/app-deployments")
+				.baseUrl("http://localhost:" + port + "/plus/test/app-deployments")
 				.defaultHeaders(headers -> headers.setBasicAuth("demo", "demo"))
 				.build();
 
