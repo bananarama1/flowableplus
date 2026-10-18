@@ -22,9 +22,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.flowableplus.work.testsupport.FlowablePlusTestContainers;
+import com.flowableplus.work.testsupport.DeployFlowableApp;
 
 @SpringBootTest(classes = com.flowableplus.work.integration.FlowablePlusIntegrationTestApplication.class)
 @ActiveProfiles("test")
+@DeployFlowableApp("app-processes")
 class ParentApplicationIT {
 
 	@ServiceConnection
@@ -45,9 +47,6 @@ class ParentApplicationIT {
 
 	@Autowired
 	private RuntimeService runtimeService;
-
-	@Autowired
-	private AppRepositoryService appRepositoryService;
 
 	@Autowired
 	private ProcessEngine processEngine;
@@ -74,13 +73,6 @@ class ParentApplicationIT {
 
 	@Test
 	void testAppDeployment() {
-		appRepositoryService.createDeployment()
-				.name("testDeployment")
-				.addClasspathResource("app-processes/app-simple-process.bpmn20.xml")
-				.addClasspathResource("app-processes/app-simple-approval-process.bpmn20.xml")
-				.addClasspathResource("app-processes/app-simple-case.cmmn")
-				.deploy();
-
 		ProcessInstance appSimpleProcess = runtimeService.startProcessInstanceByKey("appSimpleProcess");
 		Deployment deployment1 = processEngine.getRepositoryService().createDeploymentQuery()
 				.deploymentId(appSimpleProcess.getDeploymentId())
