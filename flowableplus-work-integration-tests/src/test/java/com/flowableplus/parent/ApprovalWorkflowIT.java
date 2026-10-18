@@ -7,6 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +97,23 @@ class ApprovalWorkflowIT {
 
 		assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
 		assertThat(response.getBody()).contains("simpleApprovalProcess");
+	}
+
+	@Test
+	void deploysAndDeletesAnIsolatedTestApp() {
+		RestClient client = RestClient.builder()
+				.baseUrl("http://localhost:" + port + "/flowableplus-api/plus/test/app-deployments")
+				.defaultHeaders(headers -> headers.setBasicAuth("demo", "demo"))
+				.build();
+
+		Map<?, ?> deployment = client.post()
+				.body(Map.of("resourcePath", "app-processes", "tenantId", ""))
+				.retrieve()
+				.body(Map.class);
+		String deploymentId = (String) deployment.get("deploymentId");
+		assertThat(deploymentId).isNotBlank();
+
+		client.delete().uri("/{deploymentId}", deploymentId).retrieve().toBodilessEntity();
 	}
 
 	private RestClient restClient() {

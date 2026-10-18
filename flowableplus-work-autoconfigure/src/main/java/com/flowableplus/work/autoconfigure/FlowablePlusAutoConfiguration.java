@@ -2,9 +2,11 @@ package com.flowableplus.work.autoconfigure;
 
 import org.flowable.engine.IdentityService;
 import org.flowable.engine.RepositoryService;
+import org.flowable.app.api.AppRepositoryService;
 import org.flowable.idm.api.User;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -20,8 +22,14 @@ import org.springframework.security.web.SecurityFilterChain;
 import static org.springframework.security.core.userdetails.User.withUsername;
 
 @AutoConfiguration
-@EnableConfigurationProperties(FlowablePlusProperties.class)
+@EnableConfigurationProperties({ FlowablePlusProperties.class, FlowablePlusTestingProperties.class })
 public class FlowablePlusAutoConfiguration {
+
+	@Bean
+	@ConditionalOnProperty(prefix = "flowableplus.testing", name = "enabled", havingValue = "true")
+	FlowablePlusTestDeploymentController flowablePlusTestDeploymentController(AppRepositoryService appRepositoryService) {
+		return new FlowablePlusTestDeploymentController(appRepositoryService);
+	}
 
 	@Bean
 	@ConditionalOnMissingBean
