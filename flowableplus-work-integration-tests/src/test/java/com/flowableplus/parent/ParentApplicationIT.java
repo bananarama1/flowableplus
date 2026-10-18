@@ -1,6 +1,5 @@
 package com.flowableplus.parent;
 
-import org.flowable.app.api.AppRepositoryService;
 import org.flowable.cmmn.api.CmmnRuntimeService;
 import org.flowable.cmmn.api.repository.CmmnDeployment;
 import org.flowable.cmmn.engine.CmmnEngine;
