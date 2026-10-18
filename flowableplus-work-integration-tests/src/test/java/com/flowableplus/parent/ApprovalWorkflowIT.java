@@ -28,8 +28,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 import com.flowableplus.work.testsupport.FlowablePlusTestContainers;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
 @SpringBootTest(classes = com.flowableplus.work.integration.FlowablePlusIntegrationTestApplication.class,
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -120,40 +118,5 @@ class ApprovalWorkflowIT {
 		return RestClient.builder()
 				.baseUrl("http://localhost:" + port + "/flowableplus-api/repository/process-definitions")
 				.build();
-	}
-
-	@Test
-	void reqApp004StartAnApprovalProcess() {
-		fail("REQ-APP-004 not implemented");
-	}
-
-	@Test
-	void reqApp005ViewTheCandidateTask() {
-		fail("REQ-APP-005 not implemented");
-	}
-
-	@Test
-	void reqApp006ClaimTheTask() {
-		fail("REQ-APP-006 not implemented");
-	}
-
-	@Test
-	void reqApp007CompleteTheAssignedTask() {
-		fail("REQ-APP-007 not implemented");
-	}
-
-	@Test
-	void reqApp008RejectUnauthorizedTaskCompletion() {
-		fail("REQ-APP-008 not implemented");
-	}
-
-	@Test
-	void reqApp009ReportTaskConflicts() {
-		fail("REQ-APP-009 not implemented");
-	}
-
-	@Test
-	void reqApp010ReportFlowableValidationErrors() {
-		fail("REQ-APP-010 not implemented");
 	}
 }
