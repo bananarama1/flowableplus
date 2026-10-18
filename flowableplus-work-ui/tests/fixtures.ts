@@ -22,7 +22,7 @@ export const test = base.extend<{ flowableApp: FlowableApp }>({
     }
 
     try {
-      await deploy('processes')
+      await deploy('flowablePlus/apps/simple-approval')
       await use({ deploy })
     } finally {
       for (const deploymentId of deploymentIds.reverse()) {

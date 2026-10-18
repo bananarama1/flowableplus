@@ -107,7 +107,7 @@ class ApprovalWorkflowIT {
 				.build();
 
 		Map<?, ?> deployment = client.post()
-				.body(Map.of("resourcePath", "app-processes", "tenantId", ""))
+				.body(Map.of("resourcePath", "flowablePlus/apps/simple-approval", "tenantId", ""))
 				.retrieve()
 				.body(Map.class);
 		String deploymentId = (String) deployment.get("deploymentId");

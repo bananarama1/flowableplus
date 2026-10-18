@@ -86,6 +86,7 @@ public class FlowablePlusAutoConfiguration {
 
 	@Bean
 	CommandLineRunner flowablePlusProcessDeployment(RepositoryService repositoryService,
+			AppRepositoryService appRepositoryService,
 			FlowablePlusTestingProperties testingProperties) {
 		return args -> {
 			if (testingProperties.isSkipDefaultDeployment()) {
@@ -95,10 +96,11 @@ public class FlowablePlusAutoConfiguration {
 					.processDefinitionKey("simpleApprovalProcess")
 					.latestVersion()
 					.count() == 0) {
-				repositoryService.createDeployment()
-						.name("Flowable Plus approval processes")
-						.addClasspathResource("processes/simple-process.bpmn20.xml")
-						.addClasspathResource("processes/simple-approval-process.bpmn20.xml")
+				appRepositoryService.createDeployment()
+						.name("Flowable Plus simple approval app")
+						.addClasspathResource("flowablePlus/apps/simple-approval/app-simple-process.bpmn20.xml")
+						.addClasspathResource("flowablePlus/apps/simple-approval/app-simple-approval-process.bpmn20.xml")
+						.addClasspathResource("flowablePlus/apps/simple-approval/app-simple-case.cmmn")
 						.deploy();
 			}
 		};

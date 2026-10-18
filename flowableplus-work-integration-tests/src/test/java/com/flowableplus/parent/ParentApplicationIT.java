@@ -25,7 +25,7 @@ import com.flowableplus.work.testsupport.DeployFlowableApp;
 
 @SpringBootTest(classes = com.flowableplus.work.integration.FlowablePlusIntegrationTestApplication.class)
 @ActiveProfiles("test")
-@DeployFlowableApp("app-processes")
+@DeployFlowableApp("flowablePlus/apps/simple-approval")
 class ParentApplicationIT {
 
 	@ServiceConnection
@@ -72,21 +72,21 @@ class ParentApplicationIT {
 
 	@Test
 	void testAppDeployment() {
-		ProcessInstance appSimpleProcess = runtimeService.startProcessInstanceByKey("appSimpleProcess");
+		ProcessInstance appSimpleProcess = runtimeService.startProcessInstanceByKey("simpleProcess");
 		Deployment deployment1 = processEngine.getRepositoryService().createDeploymentQuery()
 				.deploymentId(appSimpleProcess.getDeploymentId())
 				.singleResult();
 
-		ProcessInstance appSimpleApprovalProcess = runtimeService.startProcessInstanceByKey("appSimpleApprovalProcess");
+		ProcessInstance appSimpleApprovalProcess = runtimeService.startProcessInstanceByKey("simpleApprovalProcess");
 		Deployment deployment2 = processEngine.getRepositoryService().createDeploymentQuery()
 				.deploymentId(appSimpleApprovalProcess.getDeploymentId())
 				.singleResult();
 		assertThat(deployment2.getParentDeploymentId()).isNotBlank();
 
 		var caseInstance = cmmnRuntimeService.createCaseInstanceBuilder()
-				.caseDefinitionKey("appSimpleCase")
+				.caseDefinitionKey("simpleCase")
 				.start();
-		assertThat(caseInstance.getCaseDefinitionKey()).isEqualTo("appSimpleCase");
+		assertThat(caseInstance.getCaseDefinitionKey()).isEqualTo("simpleCase");
 		assertThat(caseInstance.getCaseDefinitionDeploymentId()).isNotBlank();
 
 		CmmnDeployment deployment3 = cmmnEngine.getCmmnRepositoryService().createDeploymentQuery()
