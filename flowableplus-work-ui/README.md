@@ -29,3 +29,7 @@ docker compose up --build --watch
 ```
 
 The UI is available at `http://localhost:3000`.
+
+## Test isolation
+
+Playwright tests import `test` from `tests/fixtures.ts`, whose automatic fixture deletes all runtime process instances after each test, mirroring the cleanup done by `@DeployFlowableApp` in backend tests. Tests must not depend on state left by other tests.
