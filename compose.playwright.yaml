@@ -1,0 +1,34 @@
+services:
+  playwright-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://playwright-postgres:5432/flowable
+      SPRING_DATASOURCE_USERNAME: flowable
+      SPRING_DATASOURCE_PASSWORD: flowable
+      FLOWABLEPLUS_TESTING_SKIP_DEFAULT_DEPLOYMENT: "true"
+      FLOWABLE_CHECK_PROCESS_DEFINITIONS: "false"
+    ports:
+      - "18080:8080"
+    depends_on:
+      playwright-postgres:
+        condition: service_healthy
+
+  playwright-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: flowable
+      POSTGRES_USER: flowable
+      POSTGRES_PASSWORD: flowable
+    volumes:
+      - playwright-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowable -d flowable"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  playwright-postgres-data:

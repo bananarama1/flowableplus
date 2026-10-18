@@ -10,7 +10,7 @@ The UI uses the native Flowable REST API under `/flowableplus-api`. Vite proxies
 
 ## End-to-end tests
 
-Browser tests belong in a Playwright suite and should run against the complete Docker Compose stack. The primary scenario is:
+Browser tests run against a dedicated backend and PostgreSQL stack defined in `../compose.playwright.yaml`. Playwright starts that stack before the suite and tears it down, including its database volume, after the suite. The primary scenario is:
 
 ```text
 login -> process definitions -> start approval -> task -> claim -> complete -> verify
@@ -29,3 +29,7 @@ docker compose up --build --watch
 ```
 
 The UI is available at `http://localhost:3000`.
+
+## Test isolation
+
+Playwright tests import `test` from `tests/fixtures.ts`. Its automatic `flowableApp` fixture deploys the `processes` sample model app before each test through the test deployment API and deletes that deployment afterward. The dedicated database is removed with the backend stack after the suite, so local Compose data is not affected.
