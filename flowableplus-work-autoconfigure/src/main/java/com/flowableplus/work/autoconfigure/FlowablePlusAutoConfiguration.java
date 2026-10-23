@@ -35,9 +35,9 @@ public class FlowablePlusAutoConfiguration {
 	@ConditionalOnMissingBean
 	SecurityFilterChain flowablePlusSecurity(HttpSecurity http, AuthenticationProvider authenticationProvider) throws Exception {
 		http.authorizeHttpRequests(requests -> requests
-				.requestMatchers("/login", "/css/**", "/js/**").permitAll()
+				.requestMatchers("/login", "/css/**", "/js/**", "/plus/modeler/**").permitAll()
 				.anyRequest().authenticated())
-			.csrf(csrf -> csrf.ignoringRequestMatchers("/plus/test/app-deployments/**"))
+			.csrf(csrf -> csrf.ignoringRequestMatchers("/plus/test/app-deployments/**", "/plus/modeler/**"))
 			.authenticationProvider(authenticationProvider)
 			.httpBasic(httpBasic -> {})
 			.formLogin(form -> form.permitAll())

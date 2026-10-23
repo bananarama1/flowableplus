@@ -18,6 +18,11 @@
 		</dependency>
 		<dependency>
 			<groupId>com.flowableplus</groupId>
+			<artifactId>flowableplus-work-modeler</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.flowableplus</groupId>
 			<artifactId>flowableplus-example-models</artifactId>
 			<version>${project.version}</version>
 		</dependency>

@@ -30,7 +30,7 @@ build/
 !**/src/test/**/build/
 
 ### Frontend ###
-flowableplus-work-ui/node_modules/
+node_modules/
 flowableplus-work-ui/dist/
 flowableplus-work-ui/test-results/
 

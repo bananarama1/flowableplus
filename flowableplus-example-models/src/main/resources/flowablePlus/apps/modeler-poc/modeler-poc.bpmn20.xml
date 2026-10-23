@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             id="modelerDefinitions"
+             targetNamespace="http://flowableplus.com/modeler-poc">
+  <process id="modelerPocProcess" name="Modeler POC" isExecutable="false">
+    <startEvent id="start" name="Start" />
+    <task id="review" name="Review model" />
+    <endEvent id="end" name="End" />
+    <sequenceFlow id="startToReview" sourceRef="start" targetRef="review" />
+    <sequenceFlow id="reviewToEnd" sourceRef="review" targetRef="end" />
+  </process>
+  <bpmndi:BPMNDiagram id="modelerDiagram">
+    <bpmndi:BPMNPlane id="modelerPlane" bpmnElement="modelerPocProcess">
+      <bpmndi:BPMNShape id="start_di" bpmnElement="start">
+        <dc:Bounds x="120" y="100" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="review_di" bpmnElement="review">
+        <dc:Bounds x="220" y="78" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_di" bpmnElement="end">
+        <dc:Bounds x="410" y="100" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="startToReview_di" bpmnElement="startToReview">
+        <di:waypoint x="156" y="118" />
+        <di:waypoint x="220" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="reviewToEnd_di" bpmnElement="reviewToEnd">
+        <di:waypoint x="340" y="118" />
+        <di:waypoint x="410" y="118" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

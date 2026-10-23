@@ -19,6 +19,7 @@ This directory is the durable architecture reference for Flowable Plus.
 - [ADR-005: Initial authentication and identity](decisions/ADR-005-initial-authentication-and-identity.md)
 - [ADR-006: PostgreSQL and classpath model deployment](decisions/ADR-006-persistence-and-model-deployment.md)
 - [ADR-007: Layered testing strategy](decisions/ADR-007-layered-testing-strategy.md)
+- [ADR-008: Local filesystem modeler](decisions/ADR-008-local-filesystem-modeler.md)
 
 ## How to change a decision
 

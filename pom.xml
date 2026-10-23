@@ -17,6 +17,7 @@
 	<modules>
 		<module>flowableplus-work-core</module>
 		<module>flowableplus-work-autoconfigure</module>
+		<module>flowableplus-work-modeler</module>
 		<module>flowableplus-work-starter</module>
 		<module>flowableplus-work-test-models</module>
 		<module>flowableplus-work-test-support</module>
